@@ -1,0 +1,19 @@
+{
+  "name": "splinter",
+  "version": "1.0.0",
+  "description": "Cloud Foundry Smoke Test Framework",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deadlysyn/splinter.git"
+  },
+  "author": "Mike Hoskins",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/deadlysyn/splinter/issues"
+  },
+  "homepage": "https://github.com/deadlysyn/splinter#readme"
+}

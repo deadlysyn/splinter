@@ -1,0 +1,7 @@
+{
+    "testRedis": true,
+    "testRabbit": false,
+    "testMySQL": false,
+    "testMongo": false,
+    "emitMetrics": false
+}
