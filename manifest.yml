@@ -11,4 +11,4 @@ applications:
     routes:
       - route: splinter-test.cfapps.io
     env:
-      NODE_OPTIONS: --max-old-space-size=16
+      OPTIMIZE_MEMORY: true
