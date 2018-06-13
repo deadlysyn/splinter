@@ -18,6 +18,9 @@
   },
   "homepage": "https://github.com/deadlysyn/splinter#readme",
   "dependencies": {
-    "cfenv": "^1.1.0"
+    "cfenv": "^1.1.0",
+    "express": "^4.16.3",
+    "fs": "0.0.1-security",
+    "path": "^0.12.7"
   }
 }
