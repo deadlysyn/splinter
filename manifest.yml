@@ -1,0 +1,14 @@
+---
+applications:
+  - name: splinter
+    memory: 64M
+    instances: 1
+    services:
+      - my-mongodb
+      - my-rabbitmq
+      - my-mysql
+      - my-redis
+    routes:
+      - route: splinter-test.cfapps.io
+    env:
+      NODE_OPTIONS: --max-old-space-size=16
