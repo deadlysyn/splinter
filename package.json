@@ -17,6 +17,9 @@
     "url": "https://github.com/deadlysyn/splinter/issues"
   },
   "homepage": "https://github.com/deadlysyn/splinter#readme",
+  "engines": {
+      "node": "8.11.2"
+  },
   "dependencies": {
     "cfenv": "^1.1.0",
     "express": "^4.16.3",
