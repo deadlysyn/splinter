@@ -1,3 +1,5 @@
+![Picture of Master Splinter](https://github.com/deadlysyn/splinter/blob/master/assets/splinter.jpg)
+
 # Splinter: Cloud Foundry Smoke Tester
 
 Based on prior art:
