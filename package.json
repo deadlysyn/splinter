@@ -4,7 +4,8 @@
   "description": "Cloud Foundry Smoke Test Framework",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
   },
   "repository": {
     "type": "git",
@@ -15,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/deadlysyn/splinter/issues"
   },
-  "homepage": "https://github.com/deadlysyn/splinter#readme"
+  "homepage": "https://github.com/deadlysyn/splinter#readme",
+  "dependencies": {
+    "cfenv": "^1.1.0"
+  }
 }
