@@ -1,15 +1,18 @@
-const cfenv = require('cfenv')
-const fs = require('fs')
-const path = require('path')
+const express = require('express'),
+    app = express(),
+    cfenv = require('cfenv'),
+    fs = require('fs'),
+    path = require('path'),
+    mongoose = require('mongoose'),
+    redis = require('redis'),
+    mysql = require('mysql'),
+    pg = require('pg')
 
-const express = require('express')
-const app = express()
-
+const config = path.join(__dirname, process.env.CONF)
 const ip = process.env.IP || '0.0.0.0'
 const port = parseInt(process.env.PORT, 10) || 3000
 
 // read configuration
-const config = path.join(__dirname, process.env.CONF)
 var configObj = {}
 
 fs.readFile(config, {encoding: 'utf-8'}, function(err, data) {
