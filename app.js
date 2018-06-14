@@ -24,10 +24,15 @@ fs.readFile(config, {encoding: 'utf-8'}, function(err, data) {
     }
 })
 
+// parse VCAP_SERVICES. vcapFile used when ran locally.
+const appEnv = cfenv.getAppEnv({
+    "vcapFile": path.join(__dirname, 'test/vcap.json')
+})
+
 // routes
 
 app.get('/', function(req, res, next) {
-    res.status(200).send(configObj)
+    res.status(200).send(appEnv.getServiceCreds('my-mongodb'))
 })
 
 // app.get('/list', m.logRequest, function(req, res, next) {
