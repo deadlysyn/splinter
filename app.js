@@ -35,7 +35,7 @@ const appEnv = cfenv.getAppEnv({
 // routes
 app.get('/', function(req, res, next) {
     if (configObj.testRedis) {
-        res.status(200).send(appEnv.getServiceCreds('my-mongodb'))
+        res.status(200).send(appEnv.getServiceCreds(configObj.redisInstance))
     } else {
         res.status(200).send('No tests enabled.')
     }
