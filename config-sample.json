@@ -1,7 +1,12 @@
 {
     "testRedis": true,
+    "redisInstance": "my-redis",
     "testRabbit": false,
-    "testMySQL": false,
+    "rabbitInstance": "my-rabbitmq",
+    "testMysql": false,
+    "mysqlInstance": "my-mysql",
+    "testPostgres": false,
+    "postgresInstance": "my-pgsql",
     "testMongo": false,
-    "emitMetrics": false
+    "mongoInstance": "my-mongodb"
 }
