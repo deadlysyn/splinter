@@ -33,9 +33,12 @@ const appEnv = cfenv.getAppEnv({
 })
 
 // routes
-
 app.get('/', function(req, res, next) {
-    res.status(200).send(appEnv.getServiceCreds('my-mongodb'))
+    if (configObj.testRedis) {
+        res.status(200).send(appEnv.getServiceCreds('my-mongodb'))
+    } else {
+        res.status(200).send('No tests enabled.')
+    }
 })
 
 // app.get('/list', m.logRequest, function(req, res, next) {
