@@ -1,0 +1,133 @@
+{
+    "services": {
+        "mlab": [
+            {
+                "name": "my-mongodb",
+                "instance_name": "my-mongodb",
+                "binding_name": null,
+                "credentials": {
+                    "uri": "mongodb://mongouser:mongopass@mongo.host:57470/collection"
+                },
+                "syslog_drain_url": null,
+                "volume_mounts": [],
+                "label": "mlab",
+                "provider": null,
+                "plan": "sandbox",
+                "tags": [
+                    "Cloud Databases",
+                    "Developer Tools",
+                    "Web-based",
+                    "Data Store",
+                    "document",
+                    "Windows",
+                    "Security",
+                    "IT Management",
+                    "mongodb",
+                    "Mac"
+                ]
+            }
+        ],
+        "cloudamqp": [
+            {
+                "name": "my-rabbitmq",
+                "instance_name": "my-rabbitmq",
+                "binding_name": null,
+                "credentials": {
+                    "uri": "amqp://rabbituser:rabbitpass@rabbit.host/queue",
+                    "http_api_uri": "https://rabbituser:rabbitpass@rabbit.host/api/"
+                },
+                "syslog_drain_url": null,
+                "volume_mounts": [],
+                "label": "cloudamqp",
+                "provider": null,
+                "plan": "lemur",
+                "tags": [
+                    "Customer Service",
+                    "Web-based",
+                    "User Provisioning",
+                    "Messaging and Queuing",
+                    "IT Service Management",
+                    "amqp",
+                    "Backup",
+                    "Online Backup & Storage",
+                    "Single Sign-On",
+                    "Cloud Security and Monitoring",
+                    "New Product",
+                    "rabbitmq",
+                    "Android",
+                    "Developer Tools",
+                    "Cloud Deployment & Management",
+                    "Development and Test Tools",
+                    "Buyable",
+                    "Messaging",
+                    "Importable",
+                    "IT Management"
+                ]
+            }
+        ],
+        "cleardb": [
+            {
+                "name": "my-mysql",
+                "instance_name": "my-mysql",
+                "binding_name": null,
+                "credentials": {
+                    "jdbcUrl": "jdbc:mysql://mysql.host/database?user=mysqluser&password=mysqlpass",
+                    "uri": "mysql://mysqluser:mysqlpass@mysql.host:3306/database?reconnect=true",
+                    "name": "database",
+                    "hostname": "mysql.host",
+                    "port": "3306",
+                    "username": "mysqluser",
+                    "password": "mysqlpass"
+                },
+                "syslog_drain_url": null,
+                "volume_mounts": [],
+                "label": "cleardb",
+                "provider": null,
+                "plan": "spark",
+                "tags": [
+                    "Data Stores",
+                    "Cloud Databases",
+                    "Developer Tools",
+                    "Web-based",
+                    "Data Store",
+                    "Development and Test Tools",
+                    "Online Backup & Storage",
+                    "Single Sign-On",
+                    "Buyable",
+                    "relational",
+                    "mysql",
+                    "Cloud Security and Monitoring"
+                ]
+            }
+        ],
+        "rediscloud": [
+            {
+                "name": "my-redis",
+                "instance_name": "my-redis",
+                "binding_name": null,
+                "credentials": {
+                    "hostname": "redis.host",
+                    "password": "redispass",
+                    "port": "13988"
+                },
+                "syslog_drain_url": null,
+                "volume_mounts": [],
+                "label": "rediscloud",
+                "provider": null,
+                "plan": "30mb",
+                "tags": [
+                    "Data Stores",
+                    "Web-based",
+                    "Data Store",
+                    "Caching",
+                    "Messaging and Queuing",
+                    "Data Management",
+                    "key-value",
+                    "IT Management",
+                    "caching",
+                    "redis"
+                ]
+            }
+        ]
+    }
+}
