@@ -1,52 +1,20 @@
 const express = require('express'),
     app = express(),
-    cfenv = require('cfenv'),
-    fs = require('fs'),
-    path = require('path'),
-    mongoose = require('mongoose'),
-    redis = require('redis'),
-    mysql = require('mysql'),
-    pg = require('pg')
+    h = require('./helpers.js')
 
-const config = path.join(__dirname, process.env.CONF)
 const ip = process.env.IP || '0.0.0.0'
 const port = parseInt(process.env.PORT, 10) || 3000
 
-// read configuration
-var configObj = {}
-
-fs.readFile(config, {encoding: 'utf-8'}, function(err, data) {
-    if (err) {
-        console.log('Error reading configuration: ' + err)
-    } else {
-        try {
-            configObj = JSON.parse(data)
-        } catch(err) {
-            console.log('Error parsing JSON configuration: ' + err)
-        }
-    }
-})
-
-// parse VCAP_SERVICES. vcapFile used when ran locally.
-const appEnv = cfenv.getAppEnv({
-    "vcapFile": path.join(__dirname, 'test/vcap.json')
-})
-
 // routes
-app.get('/', function(req, res, next) {
-    if (configObj.testRedis) {
-        res.status(200).send(appEnv.getServiceCreds(configObj.redisInstance))
-    } else {
-        res.status(200).send('No tests enabled.')
-    }
+app.get('/', h.runTests, h.logRequest, function(req, res, next) {
+    res.send(res.locals.testResults)
 })
-
-// app.get('/list', m.logRequest, function(req, res, next) {
-//     res.render('list', {results: req.session.results})
-// })
 
 app.all('*', function(req, res, next) {
-    res.status(404).send('Page not found.')
+    res.status(404)
+    // if ran as middleware this won't see res.status' effects
+    h.logRequest(req, res, next)
+    res.send({ 'error': 'Page not found.' })
 })
 
 app.listen(port, ip, function() {
