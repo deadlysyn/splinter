@@ -25,11 +25,12 @@ fs.readFile(configFile, {encoding: 'utf-8'}, function(err, data) {
 // hold helper functions we'll export
 var helpers = {}
 
-helpers.logRequest = function(req, res, next) {
-    let date = new Date().toISOString()
-    console.log(date + ' ' + req.ip + ' ' + req.method + ' ' + req.url + ' ' + res.statusCode)
-    return next()
-}
+// only do this when NODE_ENV=dev
+// helpers.logRequest = function(req, res, next) {
+//     let date = new Date().toISOString()
+//     console.log(date + ' ' + req.ip + ' ' + req.method + ' ' + req.url + ' ' + res.statusCode)
+//     return next()
+// }
 
 helpers.runTests = function(req, res, next) {
     let ranTest = false
@@ -63,15 +64,16 @@ helpers.runTests = function(req, res, next) {
         ranTest = true
         testRedis(res, appEnv.getServiceCreds(conf.redisInstance), function(results) {
             res.locals.testResults.redis = results
+            console.log('results: ' + JSON.stringify(results))
+            return next()
         })
     }
 
     if (!ranTest) {
-        res.status(400)
+        res.status(500)
         res.locals.testResults = '{ "message": "No tests enabled." }'
     }
 
-    return next()
 }
 
 module.exports = helpers
@@ -95,16 +97,17 @@ function testRedis(res, credentials, callback) {
     })
 
     // create record; auto-expire after 30 seconds
-    client.set('splinter', Date.now(), 'EX', 30, redis.print)
+    client.set('splinter', Date.now(), 'EX', 30)
 
     // read record
     client.get('splinter', function(err, timestamp) {
         if (err) {
             res.status(500)
-            results.message = err
+            results.message = err.toString()
+            results.time = 0
         } else {
             results.message = 'success'
-            results.time = Math.floor((Date.now() - timestamp) / 1000)
+            results.time = (Date.now() - timestamp) / 1000
         }
         client.quit()
         callback(results)
