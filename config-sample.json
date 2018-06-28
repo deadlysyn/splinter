@@ -1,5 +1,5 @@
 {
-    "testMongo"             : false,
+    "testMongo"             : true,
     "mongoInstance"         : "my-mongodb",
     "testMysql"             : false,
     "mysqlInstance"         : "my-mysql",
