@@ -1,14 +1,14 @@
 const cfenv = require('cfenv'),
     path = require('path'),
     mongoose = require('mongoose'),
-    Test = require('./models/mongoTest'),
+    Test = require('../models/mongoTest'),
     redis = require('redis'),
     mysql = require('mysql'),
     pg = require('pg')
 
 // parse VCAP_SERVICES. vcapFile used when ran locally.
 const appEnv = cfenv.getAppEnv({
-    "vcapFile": path.join(__dirname, 'test/vcap.json')
+    "vcapFile": path.join(__dirname, '../test/vcap.json')
 })
 
 var middleware = {}
