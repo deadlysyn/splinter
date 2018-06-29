@@ -11,76 +11,83 @@ const appEnv = cfenv.getAppEnv({
     "vcapFile": path.join(__dirname, '../test/vcap.json')
 })
 
+// helpers
+
+function handleErr(err, res, results) {
+    console.log(err.toString())
+    res.status(500)
+    results.message = err.toString()
+}
+
+function setup(req, serviceInstance) {
+    if ("message" in req.app.locals.testResults) {
+        delete req.app.locals.testResults.message
+    }
+    let state = {}
+    state.results = { message: 'success', time: 0 }
+    state.creds = appEnv.getServiceCreds(serviceInstance)
+    state.time = Date.now()
+    return state
+}
+
+// middleware
+
 var middleware = {}
 
 middleware.testMongo = function(req, res, next) {
-    let results = { message: 'success', time: 0 }
-    let credentials = appEnv.getServiceCreds(req.app.locals.conf.mongoInstance)
-    let currentTime = Date.now()
+    let serviceInstance = req.app.locals.conf.mongoInstance
+    let s = setup(req, serviceInstance)
 
-    mongoose.connect(credentials.uri)
+    mongoose.connect(s.creds.uri, { 'bufferCommands': false })
     let db = mongoose.connection
-    db.on('error', console.error.bind(console, 'connection error:'))
+    db.on('error', function(err) {
+        handleErr(err, res, s.results)
+        req.app.locals.testResults.mongo = s.results
+        db.close()
+        return next()
+    })
 
     // create document
-    let testDoc = new Test({ timestamp: currentTime })
-    testDoc.save(function (err) {
-        if (err) {
-            console.log(err)
-            res.status(500)
-            results.message = err.toString()
-        } else {
-            // find and read document
-            Test.findOne({ name: 'splinter' }, function(err, test) {
-                if (err) {
-                    console.log(err)
-                    res.status(500)
-                    results.message = err.toString()
-                } else {
-                    results.time = (Date.now() - test.timestamp) / 1000
-                }
-                req.app.locals.testResults.mongo = results
-                // cleanup
-                Test.remove({}, function(err) {
-                    if (err) {
-                        console.log(err)
-                    }
-                    db.close()
-                    return next()
-                })
+    let testDoc = new Test({ 'timestamp': s.time })
+    testDoc.save(function () {
+        // find and read document
+        Test.findOne({ name: 'splinter' }, function(_, test) {
+            s.results.time = (Date.now() - test.timestamp) / 1000
+            req.app.locals.testResults[serviceInstance] = s.results
+            // cleanup
+            Test.remove({}, function() {
+                db.close()
+                return next()
             })
-        }
+        })
     })
 }
 
 middleware.testRedis = function(req, res, next) {
-    let results = { message: 'success', time: 0 }
-    let credentials = appEnv.getServiceCreds(req.app.locals.conf.redisInstance)
-    let currentTime = Date.now()
+    let serviceInstance = req.app.locals.conf.redisInstance
+    let s = setup(req, serviceInstance)
 
     let client = redis.createClient({
-        host:       credentials.hostname,
-        port:       credentials.port,
-        password:   credentials.password
+        host:       s.creds.hostname,
+        port:       s.creds.port,
+        password:   s.creds.password
     })
 
     client.on('error', function (err) {
-        console.log(err.toString());
+        handleErr(err, res, s.results)
+        req.app.locals.testResults.redis = s.results
+        client.quit()
+        return next()
     })
 
     // create record; auto-expire after 30 seconds
-    client.set('splinter', currentTime, 'EX', 30)
+    client.set('splinter', s.time, 'EX', 30)
 
     // read record
-    client.get('splinter', function(err, timestamp) {
-        if (err) {
-            res.status(500)
-            results.message = err.toString()
-        } else {
-            results.time = (Date.now() - timestamp) / 1000
-        }
+    client.get('splinter', function(_, timestamp) {
+        s.results.time = (Date.now() - timestamp) / 1000
+        req.app.locals.testResults[serviceInstance] = s.results
         client.quit()
-        req.app.locals.testResults.redis = results
         return next()
     })
 }
