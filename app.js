@@ -2,7 +2,7 @@ const express = require('express'),
     app = express(),
     fs = require('fs'),
     path = require('path'),
-    m = require('./middleware.js')
+    m = require('./middleware')
 
 const configFile = path.join(__dirname, process.env.CONF)
 const ip = process.env.IP || '0.0.0.0'
@@ -11,7 +11,7 @@ const port = parseInt(process.env.PORT, 10) || 3000
 app.use(function (req, res, next) {
     if (!req.app.locals.testResults) {
         // hold aggregated test results
-        req.app.locals.testResults = '{ "message": "No tests enabled." }'
+        req.app.locals.testResults = { 'message': 'No tests ran.' }
     }
     next()
 })
