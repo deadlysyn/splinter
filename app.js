@@ -38,13 +38,16 @@ if (app.locals.conf.testRedis) {
 
 // routes
 app.get('/', tests, function(req, res, next) {
-    res.send(req.app.locals.testResults)
+    res.send({
+        'timestamp': new Date().toJSON(),
+        'results': req.app.locals.testResults
+    })
 })
 
 app.all('*', function(req, res, next) {
-    res.status(404).send({ 'error': 'Page not found.' })
+    res.status(404).send({ 'message': 'Page not found.' })
 })
 
 app.listen(port, ip, function() {
-    console.log('Server listening on ' + ip + ':' + port)
+    console.log('listening on ' + ip + ':' + port)
 })
