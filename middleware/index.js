@@ -11,7 +11,7 @@ const appEnv = cfenv.getAppEnv({
     "vcapFile": path.join(__dirname, '../test/vcap.json')
 })
 
-// helpers
+/* helpers */
 
 function handleErr(err, res, results) {
     console.log(err.toString())
@@ -19,10 +19,8 @@ function handleErr(err, res, results) {
     results.message = err.toString()
 }
 
+// startup tasks required by each test
 function setup(req, serviceInstance) {
-    if ("message" in req.app.locals.testResults) {
-        delete req.app.locals.testResults.message
-    }
     let state = {}
     state.results = { message: 'success', time: 0 }
     state.creds = appEnv.getServiceCreds(serviceInstance)
@@ -30,7 +28,7 @@ function setup(req, serviceInstance) {
     return state
 }
 
-// middleware
+/* middleware */
 
 var middleware = {}
 
@@ -39,6 +37,7 @@ middleware.testMongo = function(req, res, next) {
     let s = setup(req, serviceInstance)
 
     mongoose.connect(s.creds.uri, { 'bufferCommands': false })
+
     let db = mongoose.connection
     db.on('error', function(err) {
         handleErr(err, res, s.results)
