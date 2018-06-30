@@ -11,7 +11,7 @@ const port = parseInt(process.env.PORT, 10) || 3000
 app.use(function (req, res, next) {
     if (!req.app.locals.testResults) {
         // hold aggregated test results
-        req.app.locals.testResults = { 'message': 'No tests ran.' }
+        req.app.locals.testResults = {}
     }
     next()
 })
@@ -34,6 +34,9 @@ if (app.locals.conf.testRabbit) {
 }
 if (app.locals.conf.testRedis) {
     tests.push(m.testRedis)
+}
+if (tests.length == 0) {
+    req.app.locals.testResults = { 'message': 'No tests enabled.' }
 }
 
 // routes
