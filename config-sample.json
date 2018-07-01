@@ -1,7 +1,7 @@
 {
     "testMongo"             : true,
     "mongoInstance"         : "my-mongodb",
-    "testMysql"             : false,
+    "testMysql"             : true,
     "mysqlInstance"         : "my-mysql",
     "testPostgres"          : false,
     "postgresInstance"      : "my-pgsql",
