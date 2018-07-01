@@ -13,6 +13,7 @@ const appEnv = cfenv.getAppEnv({
 
 /* helpers */
 
+// common tasks to run on any errors
 function handleErr(err, res, results) {
     console.log(err.toString())
     res.status(500)
@@ -41,22 +42,46 @@ middleware.testMongo = function(req, res, next) {
     let db = mongoose.connection
     db.on('error', function(err) {
         handleErr(err, res, s.results)
-        req.app.locals.testResults.mongo = s.results
+        req.app.locals.testResults[serviceInstance] = s.results
         db.close()
         return next()
     })
 
-    // create document
     let testDoc = new Test({ 'timestamp': s.time })
     testDoc.save(function () {
-        // find and read document
         Test.findOne({ name: 'splinter' }, function(_, test) {
             s.results.time = (Date.now() - test.timestamp) / 1000
             req.app.locals.testResults[serviceInstance] = s.results
-            // cleanup
             Test.remove({}, function() {
                 db.close()
                 return next()
+            })
+        })
+    })
+}
+
+middleware.testMysql = function(req, res, next) {
+    let serviceInstance = req.app.locals.conf.mysqlInstance
+    let s = setup(req, serviceInstance)
+
+    var db = mysql.createConnection(s.creds.uri)
+
+    db.on('error', function(err) {
+        handleErr(err, res, s.results)
+        req.app.locals.testResults[serviceInstance] = s.results
+        db.end()
+        return next()
+    })
+
+    db.query('CREATE TABLE test (timestamp BIGINT)', function () {
+        db.query('INSERT INTO test (timestamp) VALUES(?)', s.time, function () {
+            db.query('SELECT timestamp FROM test LIMIT 1', function (_, result) {
+                s.results.time = (Date.now() - result[0].timestamp) / 1000
+                req.app.locals.testResults[serviceInstance] = s.results
+                db.query('DROP TABLE test', function() {
+                    db.end()
+                    return next()
+                })
             })
         })
     })
@@ -74,15 +99,13 @@ middleware.testRedis = function(req, res, next) {
 
     client.on('error', function (err) {
         handleErr(err, res, s.results)
-        req.app.locals.testResults.redis = s.results
+        req.app.locals.testResults[serviceInstance] = s.results
         client.quit()
         return next()
     })
 
-    // create record; auto-expire after 30 seconds
-    client.set('splinter', s.time, 'EX', 30)
+    client.set('splinter', s.time, 'EX', 30) // expire after 30 seconds
 
-    // read record
     client.get('splinter', function(_, timestamp) {
         s.results.time = (Date.now() - timestamp) / 1000
         req.app.locals.testResults[serviceInstance] = s.results
