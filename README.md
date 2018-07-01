@@ -19,13 +19,34 @@ Splinter is an attempt to meet that need. The idea is to provide a single
 application and sample Concourse pipeline allowing platform teams to easily
 and selectively exercise shared services.
 
-# Wishlist
+# Overview
+For each service enabled in the configuration (see `config-sample.json`),
+`splinter` will:
 
-**NOTE: This project is still an early WIP!**
+- Get the instance name from configuration
+- Auto-discover service details from the environment (uri, password, etc)
+- Configure a client and open a connection to the service
+- Write test record to the service
+- Read test record from the service
+- Report success/fail and timing for each test
 
-- Simple node app to exercise MySQL, Postgres, Redis and RabbitMQ
-    - Allow user to specify which services to test
-    - Write/read against service instance(s)
-    - Report pass/fail and timing (support SLOs)
+# Setup
+TBD
+
+# To-Do
+
+- Simple node app to exercise shared services
+    - ~~MongoDB~~
+    - ~~MySQL~~
+    - Postgres
+    - ~~Redis~~
+    - RabbitMQ
+    - ~~Allow user to specify which services to test~~
+    - ~~Auto-discover service details~~
+    - ~~Write/read against service instance(s)~~
+- JSON endpoint
+    - Test status
+    - Metrics useful for SLO
 - Concourse pipeline to deploy/update
-- Start with JSON, but consider other output formats
+- Resilience / handle edge cases
+- Documentation
