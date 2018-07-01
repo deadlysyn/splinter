@@ -23,7 +23,7 @@ function handleErr(err, res, results) {
 // startup tasks required by each test
 function setup(req, serviceInstance) {
     let state = {}
-    state.results = { message: 'success', time: 0 }
+    state.results = { message: 'success', elapsed_seconds: 0 }
     state.creds = appEnv.getServiceCreds(serviceInstance)
     state.time = Date.now()
     return state
@@ -50,7 +50,7 @@ middleware.testMongo = function(req, res, next) {
     let testDoc = new Test({ 'timestamp': s.time })
     testDoc.save(function () {
         Test.findOne({ name: 'splinter' }, function(_, test) {
-            s.results.time = (Date.now() - test.timestamp) / 1000
+            s.results.elapsed_seconds = (Date.now() - test.timestamp) / 1000
             req.app.locals.testResults[serviceInstance] = s.results
             Test.remove({}, function() {
                 db.close()
@@ -76,11 +76,12 @@ middleware.testMysql = function(req, res, next) {
     db.query('CREATE TABLE test (timestamp BIGINT)', function () {
         db.query('INSERT INTO test (timestamp) VALUES(?)', s.time, function () {
             db.query('SELECT timestamp FROM test LIMIT 1', function (_, result) {
-                s.results.time = (Date.now() - result[0].timestamp) / 1000
+                s.results.elapsed_seconds = (Date.now() - result[0].timestamp) / 1000
                 req.app.locals.testResults[serviceInstance] = s.results
                 db.query('DROP TABLE test', function() {
-                    db.end()
-                    return next()
+                    db.end(function() {
+                        return next()
+                    })
                 })
             })
         })
@@ -107,7 +108,7 @@ middleware.testRedis = function(req, res, next) {
     client.set('splinter', s.time, 'EX', 30) // expire after 30 seconds
 
     client.get('splinter', function(_, timestamp) {
-        s.results.time = (Date.now() - timestamp) / 1000
+        s.results.elapsed_seconds = (Date.now() - timestamp) / 1000
         req.app.locals.testResults[serviceInstance] = s.results
         client.quit()
         return next()
