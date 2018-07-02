@@ -41,7 +41,7 @@ if (tests.length == 0) {
 
 // routes
 app.get('/', tests, function(req, res, next) {
-    res.json({
+    res.send({
         'timestamp': new Date().toJSON(),
         'results': req.app.locals.testResults
     })
