@@ -23,7 +23,7 @@ function handleErr(err, res, results) {
 // startup tasks required by each test
 function setup(req, serviceInstance) {
     let state = {}
-    state.results = { message: 'success', elapsed_seconds: 0 }
+    state.results = { message: 'success', seconds_elapsed: 0 }
     state.creds = appEnv.getServiceCreds(serviceInstance)
     state.time = Date.now()
     return state
@@ -33,14 +33,14 @@ function setup(req, serviceInstance) {
 
 var middleware = {}
 
-middleware.testMongo = function(req, res, next) {
+middleware.testMongo = (req, res, next) => {
     let serviceInstance = req.app.locals.conf.mongoInstance
     let s = setup(req, serviceInstance)
 
     mongoose.connect(s.creds.uri, { 'bufferCommands': false })
 
     let db = mongoose.connection
-    db.on('error', function(err) {
+    db.on('error', (err) => {
         handleErr(err, res, s.results)
         req.app.locals.testResults[serviceInstance] = s.results
         db.close()
@@ -48,11 +48,11 @@ middleware.testMongo = function(req, res, next) {
     })
 
     let testDoc = new Test({ 'timestamp': s.time })
-    testDoc.save(function () {
-        Test.findOne({ name: 'splinter' }, function(_, test) {
-            s.results.elapsed_seconds = (Date.now() - test.timestamp) / 1000
+    testDoc.save(() => {
+        Test.findOne({ name: 'splinter' }, (_, test) => {
+            s.results.seconds_elapsed = (Date.now() - test.timestamp) / 1000
             req.app.locals.testResults[serviceInstance] = s.results
-            Test.remove({}, function() {
+            Test.remove({}, () => {
                 db.close()
                 return next()
             })
@@ -60,26 +60,26 @@ middleware.testMongo = function(req, res, next) {
     })
 }
 
-middleware.testMysql = function(req, res, next) {
+middleware.testMysql = (req, res, next) => {
     let serviceInstance = req.app.locals.conf.mysqlInstance
     let s = setup(req, serviceInstance)
 
-    var db = mysql.createConnection(s.creds.uri)
+    let db = mysql.createConnection(s.creds.uri)
 
-    db.on('error', function(err) {
+    db.on('error', (err) => {
         handleErr(err, res, s.results)
         req.app.locals.testResults[serviceInstance] = s.results
         db.end()
         return next()
     })
 
-    db.query('CREATE TABLE test (timestamp BIGINT)', function () {
-        db.query('INSERT INTO test (timestamp) VALUES(?)', s.time, function () {
-            db.query('SELECT timestamp FROM test LIMIT 1', function (_, result) {
-                s.results.elapsed_seconds = (Date.now() - result[0].timestamp) / 1000
+    db.query('CREATE TABLE test (timestamp BIGINT)', () => {
+        db.query('INSERT INTO test (timestamp) VALUES(?)', s.time, () => {
+            db.query('SELECT timestamp FROM test LIMIT 1', (_, result) => {
+                s.results.seconds_elapsed = (Date.now() - result[0].timestamp) / 1000
                 req.app.locals.testResults[serviceInstance] = s.results
-                db.query('DROP TABLE test', function() {
-                    db.end(function() {
+                db.query('DROP TABLE test', () => {
+                    db.end(() => {
                         return next()
                     })
                 })
@@ -88,7 +88,37 @@ middleware.testMysql = function(req, res, next) {
     })
 }
 
-middleware.testRedis = function(req, res, next) {
+middleware.testPostgres = (req, res, next) => {
+    let serviceInstance = req.app.locals.conf.postgresInstance
+    let s = setup(req, serviceInstance)
+
+    let db = new pg.Client({ connectionString: s.creds.uri })
+    db.connect()
+
+    db.on('error', (err) => {
+        handleErr(err, res, s.results)
+        req.app.locals.testResults[serviceInstance] = s.results
+        db.end()
+        return next()
+    })
+
+    db.query('CREATE TABLE test (timestamp BIGINT)', () => {
+        db.query('INSERT INTO test (timestamp) VALUES($1)', [s.time], () => {
+            db.query('SELECT timestamp FROM test LIMIT 1', (_, result) => {
+                s.results.seconds_elapsed = (Date.now() - result.rows[0].timestamp) / 1000
+                req.app.locals.testResults[serviceInstance] = s.results
+                db.query('DROP TABLE test', () => {
+                    db.end(() => {
+                        return next()
+                    })
+                })
+            })
+        })
+    })
+
+}
+
+middleware.testRedis = (req, res, next) => {
     let serviceInstance = req.app.locals.conf.redisInstance
     let s = setup(req, serviceInstance)
 
@@ -98,7 +128,7 @@ middleware.testRedis = function(req, res, next) {
         password:   s.creds.password
     })
 
-    client.on('error', function (err) {
+    client.on('error', (err) => {
         handleErr(err, res, s.results)
         req.app.locals.testResults[serviceInstance] = s.results
         client.quit()
@@ -107,8 +137,8 @@ middleware.testRedis = function(req, res, next) {
 
     client.set('splinter', s.time, 'EX', 30) // expire after 30 seconds
 
-    client.get('splinter', function(_, timestamp) {
-        s.results.elapsed_seconds = (Date.now() - timestamp) / 1000
+    client.get('splinter', (_, timestamp) => {
+        s.results.seconds_elapsed = (Date.now() - timestamp) / 1000
         req.app.locals.testResults[serviceInstance] = s.results
         client.quit()
         return next()
