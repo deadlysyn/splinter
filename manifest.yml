@@ -1,17 +1,21 @@
 ---
 applications:
   - name: splinter
-    buildpack: https://github.com/cloudfoundry/nodejs-buildpack#v1.6.24
+    # buildpack: https://github.com/cloudfoundry/nodejs-buildpack#v1.6.24
     command: node app.js
     memory: 64M
     instances: 1
     services:
       - my-mongodb
-      - my-rabbitmq
       - my-mysql
+      - my-postgres
+      - my-rabbitmq
       - my-redis
     routes:
-      - route: splinter-test.cfapps.io
+      - route: splinter.cfapps.io
     env:
-      OPTIMIZE_MEMORY: true
       CONF: config-sample.json
+      NODE_MODULES_CACHE: false
+      NODE_VERBOSE: true
+      # NPM_CONFIG_LOGLEVEL: silly
+      OPTIMIZE_MEMORY: true
