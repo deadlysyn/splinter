@@ -14,7 +14,7 @@ applications:
     routes:
       - route: splinter.cfapps.io
     env:
-      CONF: config-sample.json
+      CONF: sample-config.json
       NODE_MODULES_CACHE: false
       NODE_VERBOSE: true
       # NPM_CONFIG_LOGLEVEL: silly
