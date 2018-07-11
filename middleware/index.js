@@ -4,7 +4,8 @@ const cfenv = require('cfenv'),
     Test = require('../models/mongoTest'),
     redis = require('redis'),
     mysql = require('mysql'),
-    pg = require('pg')
+    pg = require('pg'),
+    rabbit = require('amqplib/callback_api')
 
 // parse VCAP_SERVICES. vcapFile used when ran locally.
 const appEnv = cfenv.getAppEnv({
@@ -115,7 +116,26 @@ middleware.testPostgres = (req, res, next) => {
             })
         })
     })
+}
 
+middleware.testRabbit = (req, res, next) => {
+    let serviceInstance = req.app.locals.conf.rabbitInstance
+    let s = setup(req, serviceInstance)
+    let q = 'splinter'
+
+    rabbit.connect(s.creds.uri, function(err, conn) {
+        conn.createChannel(function(err, ch) {
+            ch.assertQueue(q)
+            ch.sendToQueue(q, Buffer.from(s.time.toString()))
+            ch.consume(q, function(msg) {
+                s.results.seconds_elapsed = (Date.now() - Number(msg.content.toString())) / 1000
+                req.app.locals.testResults[serviceInstance] = s.results
+                ch.ack(msg)
+                conn.close()
+                return next()
+            })
+        })
+    })
 }
 
 middleware.testRedis = (req, res, next) => {
