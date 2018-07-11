@@ -41,14 +41,14 @@ if (tests.length == 0) {
 
 // routes
 app.get('/', tests, function(req, res, next) {
-    res.send({
+    res.json({
         'timestamp': new Date().toJSON(),
         'results': req.app.locals.testResults
     })
 })
 
 app.all('*', function(req, res, next) {
-    res.status(404).send({ 'message': 'Page not found.' })
+    res.status(404).json({ 'message': 'Page not found.' })
 })
 
 app.listen(port, ip, function() {
