@@ -123,16 +123,19 @@ middleware.testRabbit = (req, res, next) => {
     let s = setup(req, serviceInstance)
     let q = 'splinter'
 
-    rabbit.connect(s.creds.uri, function(err, conn) {
+    rabbit.connect(s.creds.uri, { noDelay: true }, function(err, conn) {
         conn.createChannel(function(err, ch) {
-            ch.assertQueue(q)
-            ch.sendToQueue(q, Buffer.from(s.time.toString()))
-            ch.consume(q, function(msg) {
-                s.results.seconds_elapsed = (Date.now() - Number(msg.content.toString())) / 1000
-                req.app.locals.testResults[serviceInstance] = s.results
-                ch.ack(msg)
-                conn.close()
-                return next()
+            ch.assertQueue(q, { exclusive: true, autoDelete: true }, function(err, ok) {
+                ch.sendToQueue(q, Buffer.from(s.time.toString()))
+                ch.consume(q, function(msg) {
+                    s.results.seconds_elapsed = (Date.now() - Number(msg.content.toString())) / 1000
+                    req.app.locals.testResults[serviceInstance] = s.results
+                    ch.ackAll()
+                    ch.deleteQueue(q, {}, function(err, ok) {
+                        conn.close()
+                        return next()
+                    })
+                })
             })
         })
     })
@@ -141,6 +144,7 @@ middleware.testRabbit = (req, res, next) => {
 middleware.testRedis = (req, res, next) => {
     let serviceInstance = req.app.locals.conf.redisInstance
     let s = setup(req, serviceInstance)
+    let q = 'splinter'
 
     let client = redis.createClient({
         host:       s.creds.hostname,
@@ -155,9 +159,9 @@ middleware.testRedis = (req, res, next) => {
         return next()
     })
 
-    client.set('splinter', s.time, 'EX', 30) // expire after 30 seconds
+    client.set(q, s.time, 'EX', 30) // expire after 30 seconds
 
-    client.get('splinter', (_, timestamp) => {
+    client.get(q, (_, timestamp) => {
         s.results.seconds_elapsed = (Date.now() - timestamp) / 1000
         req.app.locals.testResults[serviceInstance] = s.results
         client.quit()
