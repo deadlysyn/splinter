@@ -71,7 +71,7 @@ middleware.testMongo = (req, res, next) => {
                         req.app.locals.testResults[svc] = cfg.results
                         cleanup()
                     } else {
-                        handleErr(cfg, 'Error: No document found', cleanup)
+                        handleErr('Error: No document found', cfg, cleanup)
                     }
                 }
             })
@@ -111,7 +111,7 @@ middleware.testMysql = (req, res, next) => {
                                 req.app.locals.testResults[svc] = cfg.results
                                 cleanup()
                             } else {
-                                handleErr(cfg, 'Error: No results from query', cleanup)
+                                handleErr('Error: No results from query', cfg, cleanup)
                             }
                         }
                     })
@@ -122,31 +122,45 @@ middleware.testMysql = (req, res, next) => {
 }
 
 middleware.testPostgres = (req, res, next) => {
-    let serviceInstance = req.app.locals.conf.postgresInstance
-    let s = init(req, serviceInstance)
+    let svc = req.app.locals.conf.postgresInstance
+    let cfg = init(req, res, svc)
+    let tbl = 'splinter'
 
-    let db = new pg.Client({ connectionString: s.creds.uri })
-    db.connect()
-
-    db.on('error', (err) => {
-        handleErr(err, res, s.results)
-        req.app.locals.testResults[serviceInstance] = s.results
-        db.end()
-        return next()
-    })
-
-    db.query('CREATE TABLE test (timestamp BIGINT)', () => {
-        db.query('INSERT INTO test (timestamp) VALUES($1)', [s.time], () => {
-            db.query('SELECT timestamp FROM test LIMIT 1', (_, result) => {
-                s.results.seconds_elapsed = (Date.now() - result.rows[0].timestamp) / 1000
-                req.app.locals.testResults[serviceInstance] = s.results
-                db.query('DROP TABLE test', () => {
-                    db.end(() => {
-                        return next()
-                    })
-                })
-            })
+    let cleanup = () => {
+        db.query(`DROP TABLE ${tbl}`, () => {
+            db.end()
+            return next()
         })
+    }
+
+    let db = new pg.Client({ connectionString: cfg.creds.uri })
+    db.connect()
+    db.on('error', (err) => handleErr(err, cfg, cleanup))
+
+    db.query(`CREATE TABLE ${tbl} (timestamp BIGINT)`, (err) => {
+        if (err) {
+            handleErr(err, cfg, cleanup)
+        } else {
+            db.query(`INSERT INTO ${tbl} (timestamp) VALUES($1)`, [cfg.time], (err) => {
+                if (err) {
+                    handleErr(err, cfg, cleanup)
+                } else {
+                    db.query(`SELECT timestamp FROM ${tbl} LIMIT 1`, (err, result) => {
+                        if (err) {
+                            handleErr(err, cfg, cleanup)
+                        } else {
+                            if (result) {
+                                cfg.results.seconds_elapsed = (Date.now() - result.rows[0].timestamp) / 1000
+                                req.app.locals.testResults[svc] = cfg.results
+                                cleanup()
+                            } else {
+                                handleErr('Error: No results from query', cfg, cleanup)
+                            }
+                        }
+                    })
+                }
+            })
+        }
     })
 }
 
