@@ -1,11 +1,5 @@
-const cfenv = require('cfenv'),
-    path = require('path'),
-    mongoose = require('mongoose'),
-    Test = require('../models/mongoTest'),
-    redis = require('redis'),
-    mysql = require('mysql'),
-    pg = require('pg'),
-    rabbit = require('amqplib/callback_api')
+const cfenv = require('cfenv')
+const path = require('path')
 
 // parse VCAP_SERVICES. vcapFile used when ran locally.
 const appEnv = cfenv.getAppEnv({
@@ -43,6 +37,8 @@ function init(req, res, svc) {
 var middleware = {}
 
 middleware.testMongo = (req, res, next) => {
+    let mongoose = require('mongoose')
+    let Test = require('../models/mongoTest')
     let svc = req.app.locals.conf.mongoInstance
     let cfg = init(req, res, svc)
 
@@ -80,6 +76,7 @@ middleware.testMongo = (req, res, next) => {
 }
 
 middleware.testMysql = (req, res, next) => {
+    let mysql = require('mysql')
     let svc = req.app.locals.conf.mysqlInstance
     let cfg = init(req, res, svc)
     let tbl = 'splinter'
@@ -122,6 +119,7 @@ middleware.testMysql = (req, res, next) => {
 }
 
 middleware.testPostgres = (req, res, next) => {
+    let pg = require('pg')
     let svc = req.app.locals.conf.postgresInstance
     let cfg = init(req, res, svc)
     let tbl = 'splinter'
@@ -165,6 +163,7 @@ middleware.testPostgres = (req, res, next) => {
 }
 
 middleware.testRabbit = (req, res, next) => {
+    let rabbit = require('amqplib/callback_api')
     let serviceInstance = req.app.locals.conf.rabbitInstance
     let s = init(req, serviceInstance)
     let q = 'splinter'
@@ -188,6 +187,7 @@ middleware.testRabbit = (req, res, next) => {
 }
 
 middleware.testRedis = (req, res, next) => {
+    redis = require('redis')
     let serviceInstance = req.app.locals.conf.redisInstance
     let s = init(req, serviceInstance)
     let q = 'splinter'
