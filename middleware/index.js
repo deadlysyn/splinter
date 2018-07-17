@@ -15,7 +15,7 @@ const appEnv = cfenv.getAppEnv({
 /* helpers */
 
 // common tasks run on any errors
-function handleErr(cfg, err, callback) {
+function handleErr(err, cfg, callback) {
     console.log(err)
     cfg.res.status(500)
     cfg.results.message = err.toString()
@@ -43,29 +43,39 @@ function init(req, res, svc) {
 var middleware = {}
 
 middleware.testMongo = (req, res, next) => {
-    let serviceInstance = req.app.locals.conf.mongoInstance
-    let s = init(req, serviceInstance)
+    let svc = req.app.locals.conf.mongoInstance
+    let cfg = init(req, res, svc)
 
-    mongoose.connect(s.creds.uri, { 'bufferCommands': false })
-
-    let db = mongoose.connection
-    db.on('error', (err) => {
-        handleErr(err, res, s.results)
-        req.app.locals.testResults[serviceInstance] = s.results
-        db.close()
-        return next()
-    })
-
-    let testDoc = new Test({ 'timestamp': s.time })
-    testDoc.save(() => {
-        Test.findOne({ name: 'splinter' }, (_, test) => {
-            s.results.seconds_elapsed = (Date.now() - test.timestamp) / 1000
-            req.app.locals.testResults[serviceInstance] = s.results
-            Test.remove({}, () => {
-                db.close()
-                return next()
-            })
+    let cleanup = () => {
+        Test.remove({}, () => {
+            db.close()
+            return next()
         })
+    }
+
+    mongoose.connect(cfg.creds.uri, { 'bufferCommands': false })
+    let db = mongoose.connection
+    db.on('error', (err) => handleErr(err, cfg, cleanup))
+
+    let testDoc = new Test({ 'timestamp': cfg.time })
+    testDoc.save((err) => {
+        if (err) {
+            handleErr(err, cfg, cleanup)
+        } else {
+            Test.findOne({ name: 'splinter' }, (err, test) => {
+                if (err) {
+                    handleErr(err, cfg, cleanup)
+                } else {
+                    if (test) {
+                        cfg.results.seconds_elapsed = (Date.now() - test.timestamp) / 1000
+                        req.app.locals.testResults[svc] = cfg.results
+                        cleanup()
+                    } else {
+                        handleErr(cfg, 'Error: No document found', cleanup)
+                    }
+                }
+            })
+        }
     })
 }
 
@@ -82,19 +92,19 @@ middleware.testMysql = (req, res, next) => {
     }
 
     let db = mysql.createConnection(cfg.creds.uri)
-    db.on('error', (err) => handleErr(cfg, err, cleanup))
+    db.on('error', (err) => handleErr(err, cfg, cleanup))
 
     db.query('CREATE TABLE ?? (timestamp BIGINT)', tbl, (err) => {
         if (err) {
-            handleErr(cfg, err, cleanup)
+            handleErr(err, cfg, cleanup)
         } else {
             db.query('INSERT INTO ?? (timestamp) VALUES(?)', [tbl, cfg.time], (err) => {
                 if (err) {
-                    handleErr(cfg, err, cleanup)
+                    handleErr(err, cfg, cleanup)
                 } else {
                     db.query('SELECT timestamp FROM ?? LIMIT 1', tbl, (err, result) => {
                         if (err) {
-                            handleErr(cfg, err, cleanup)
+                            handleErr(err, cfg, cleanup)
                         } else {
                             if (result) {
                                 cfg.results.seconds_elapsed = (Date.now() - result[0].timestamp) / 1000
