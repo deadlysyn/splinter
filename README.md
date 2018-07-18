@@ -114,10 +114,11 @@ minimize collisions by generating random names for test artifacts, but you may
 hit connection or other resource limits.
 
 The idea is to integrate this with your monitoring solution. You can monitor
-the HTTP status code, graph `seconds_elapsed`, etc. This could be done via
+the HTTP status code (if any tested service fails, you'll get a non-200 response),
+graph `seconds_elapsed` (spot anomalies over time), etc. This could be done via
 direct polling (if you expose the endpoint) or via an internal process (even
 a concourse pipeline) which periodically polls the endpoint internally,
-adjusts as needed, then submits upstream to New Relic or similar.
+formats as needed, then submits upstream to New Relic or similar.
 
 # References
 
