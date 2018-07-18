@@ -29,10 +29,11 @@ For each service enabled in the configuration (see `sample-config.json`):
 - Get instance name from configuration
 - Auto-discover service details from environment (uri, password, etc)
 - Configure client and open connection to service
+- Prep (create table, queue, etc)
 - Write test record to service
 - Read test record from service
-- Report success/fail and timing
-- Respond in JSON
+- Cleanup (drop table, etc)
+- Report success/fail and timing in JSON
 - Respond with appropriate HTTP code
 
 Service binding has seen limited testing on [Pivotal Web Services](https://run.pivotal.io).
