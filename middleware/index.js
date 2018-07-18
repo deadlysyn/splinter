@@ -215,31 +215,33 @@ middleware.testRabbit = (req, res, next) => {
 }
 
 middleware.testRedis = (req, res, next) => {
-    redis = require('redis')
-    let serviceInstance = req.app.locals.conf.redisInstance
-    let s = init(req, serviceInstance)
+    let redis = require('redis')
+    let svc = req.app.locals.conf.redisInstance
+    let cfg = init(req, res, svc)
     let q = 'splinter'
 
+    let cleanup = () => {
+        client.quit()
+        return next()
+    }
+
     let client = redis.createClient({
-        host:       s.creds.hostname,
-        port:       s.creds.port,
-        password:   s.creds.password
+        host:       cfg.creds.hostname,
+        port:       cfg.creds.port,
+        password:   cfg.creds.password
     })
+    client.on('error', (err) => handleErr(err, cfg, cleanup))
 
-    client.on('error', (err) => {
-        handleErr(err, res, s.results)
-        req.app.locals.testResults[serviceInstance] = s.results
-        client.quit()
-        return next()
-    })
+    client.set(q, cfg.time, 'EX', 30) // expire after 30 seconds
 
-    client.set(q, s.time, 'EX', 30) // expire after 30 seconds
-
-    client.get(q, (_, timestamp) => {
-        s.results.seconds_elapsed = (Date.now() - timestamp) / 1000
-        req.app.locals.testResults[serviceInstance] = s.results
-        client.quit()
-        return next()
+    client.get(q, (err, timestamp) => {
+        if (err) {
+            handleErr(err, cfg, cleanup)
+        } else {
+            cfg.results.seconds_elapsed = (Date.now() - timestamp) / 1000
+            req.app.locals.testResults[svc] = cfg.results
+            cleanup()
+        }
     })
 }
 
