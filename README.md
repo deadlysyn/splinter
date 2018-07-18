@@ -17,7 +17,11 @@ application leveraging shared services like MySQL, Redis, etc.
 
 Splinter is an attempt to meet that need. The idea is to provide a single
 application and sample Concourse pipeline allowing platform teams to easily
-and selectively exercise shared services.
+and selectively exercise shared services. `cf-smoke-tests` can continue
+providing confidence in Cloud Foundry components while Splinter integrates
+with external monitoring (directly polling the JSON endpoint, or having those
+metrics polled internally and pushed to the cloud) to provide confidence
+in shared services.
 
 # Overview
 For each service enabled in the configuration (see `sample-config.json`):
@@ -32,10 +36,14 @@ For each service enabled in the configuration (see `sample-config.json`):
 - Respond with appropriate HTTP code
 
 Service binding has seen limited testing on [Pivotal Web Services](https://run.pivotal.io).
-Some tuning may be required. Feel free to submit pull requests, or just use this
-as a starting point.
+Full CRUD examples for each service type are included, but tuning may be required.
+Feel free to submit pull requests, or just use this as a starting point!
 
-## Example Output
+## Errors and Example Output
+
+Splinter returns `200 OK` on success and non-200 (mostly `500`) on error. On
+failure, `seconds_elapsed` will also be set to `-255` and `message` will
+capture the service error.
 
 ```
 HTTP/1.1 200 OK
@@ -70,6 +78,23 @@ Content-Type: application/json; charset=utf-8
 }
 ```
 
+```
+HTTP/1.1 500 Internal Server Error
+Content-Type: application/json; charset=utf-8
+
+...
+
+{
+    "results": {
+        "my-rabbitmq": {
+            "message": "Error: Operation failed: QueueDeclare; 405 (RESOURCE-LOCKED) with message \"RESOURCE_LOCKED - cannot obtain exclusive access to locked queue 'splinter' in vhost 'tzxcpwaz'\"",
+            "seconds_elapsed": -255
+        }
+    },
+    "timestamp": "2018-07-18T01:57:07.549Z"
+}
+```
+
 # Setup
 
 1. Clone this repo
@@ -82,7 +107,10 @@ Content-Type: application/json; charset=utf-8
     1. Update `services` to match your environment
     1. Update `CONF` to point to `<your-conig-name>.json`
 1. `cf push`
-1. ...
+
+__A note on frequency...  running every minute or less frequently should be fine,
+but running too often may result in spurious errors from services under test.
+In particular, you may hit connection or other resource limits.__
 
 # To-Do
 
