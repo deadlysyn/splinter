@@ -100,8 +100,9 @@ Content-Type: application/json; charset=utf-8
 
 1. Clone this repo
 1. Copy `sample-config.json` to `<your-config-name>.json`
-1. Enable services to test (set to `true`)
-1. Configure enabled service instance names (used to lookup credentials)
+1. Edit `<your-config-name>.json`
+    1. Enable services to test (set to `true`)
+    1. Configure enabled service instance names (used to lookup credentials)
 1. Copy `manifest.yml` to `<your-manifest-name>.yml`
 1. Edit `<your-manifest-name>.yml`
     1. Adjust `buildpack` and `routes` as needed
@@ -109,27 +110,10 @@ Content-Type: application/json; charset=utf-8
     1. Update `CONF` to point to `<your-conig-name>.json`
 1. `cf push`
 
-__A note on frequency...  running every minute or less frequently should be fine,
+__A note on frequency...  running every minute or less frequently is usually fine,
 but running too often may result in spurious errors from services under test.
-In particular, you may hit connection or other resource limits.__
-
-# To-Do
-
-- Simple node app to exercise shared services
-    - ~~MongoDB~~
-    - ~~MySQL~~
-    - ~~Postgres~~
-    - ~~Redis~~
-    - ~~RabbitMQ~~
-    - ~~Allow user to specify which services to test~~
-    - ~~Auto-discover service details~~
-    - ~~Write/read against service instance(s)~~
-- ~~JSON endpoint~~
-    - ~~Test status~~
-    - ~~Metrics useful for SLO~~
-- Resilience / handle edge cases
-- Concourse pipeline to deploy/update
-- Documentation
+Splinter tries to minimize collisions by generating random names for test
+artifacts, but you may hit connection or other resource limits.__
 
 # References
 
