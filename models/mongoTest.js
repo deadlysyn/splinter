@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 const testSchema = new mongoose.Schema({
-    name: { type: String, default: 'splinter' },
+    name: String,
     timestamp: { type: Number, default: 0 }
 })
 
