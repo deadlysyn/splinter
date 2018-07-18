@@ -164,25 +164,53 @@ middleware.testPostgres = (req, res, next) => {
 
 middleware.testRabbit = (req, res, next) => {
     let rabbit = require('amqplib/callback_api')
-    let serviceInstance = req.app.locals.conf.rabbitInstance
-    let s = init(req, serviceInstance)
+    let svc = req.app.locals.conf.rabbitInstance
+    let cfg = init(req, res, svc)
     let q = 'splinter'
 
-    rabbit.connect(s.creds.uri, { noDelay: true }, function(err, conn) {
-        conn.createChannel(function(err, ch) {
-            ch.assertQueue(q, { exclusive: true, autoDelete: true }, function(err, ok) {
-                ch.sendToQueue(q, Buffer.from(s.time.toString()))
-                ch.consume(q, function(msg) {
-                    s.results.seconds_elapsed = (Date.now() - Number(msg.content.toString())) / 1000
-                    req.app.locals.testResults[serviceInstance] = s.results
-                    ch.ackAll()
-                    ch.deleteQueue(q, {}, function(err, ok) {
-                        conn.close()
-                        return next()
-                    })
-                })
+    // may be called before conn or ch are defined
+    let cleanup = () => {
+        let finish = () => {
+            try {
+                conn.close()
+                return next()
+            } catch(err) {
+                return next()
+            }
+        }
+        try {
+            ch.deleteQueue(q, {}, function(err, ok) {
+                finish()
             })
-        })
+        } catch(err) {
+            finish()
+        }
+    }
+
+    rabbit.connect(cfg.creds.uri, { noDelay: true }, function(err, conn) {
+        if (err) {
+            handleErr(err, cfg, cleanup)
+        } else {
+            conn.createChannel(function(err, ch) {
+                if (err) {
+                    handleErr(err, cfg, cleanup)
+                } else {
+                    ch.assertQueue(q, { exclusive: true, autoDelete: true }, function(err, ok) {
+                        if (err) {
+                            handleErr(err, cfg, cleanup)
+                        } else {
+                            ch.sendToQueue(q, Buffer.from(cfg.time.toString()))
+                            ch.consume(q, function(msg) {
+                                cfg.results.seconds_elapsed = (Date.now() - Number(msg.content.toString())) / 1000
+                                req.app.locals.testResults[svc] = cfg.results
+                                ch.ackAll()
+                                cleanup()
+                            })
+                        }
+                    })
+                }
+            })
+        }
     })
 }
 
