@@ -19,9 +19,7 @@ Splinter is an attempt to meet that need. The idea is to provide a single
 application and sample Concourse pipeline allowing platform teams to easily
 and selectively exercise shared services. `cf-smoke-tests` can continue
 providing confidence in Cloud Foundry components while Splinter integrates
-with external monitoring (directly polling the JSON endpoint, or having those
-metrics polled internally and pushed to the cloud) to provide confidence
-in shared services.
+with external monitoring to provide confidence in shared services.
 
 # Overview
 For each service enabled in the configuration (see `sample-config.json`):
@@ -110,10 +108,16 @@ Content-Type: application/json; charset=utf-8
     1. Update `CONF` to point to `<your-conig-name>.json`
 1. `cf push`
 
-__A note on frequency...  running every minute or less frequently is usually fine,
-but running too often may result in spurious errors from services under test.
-Splinter tries to minimize collisions by generating random names for test
-artifacts, but you may hit connection or other resource limits.__
+Running every minute or less frequently is usually fine, but running too often
+may result in spurious errors from services under test. Splinter tries to
+minimize collisions by generating random names for test artifacts, but you may
+hit connection or other resource limits.
+
+The idea is to integrate this with your monitoring solution. You can monitor
+the HTTP status code, graph `seconds_elapsed`, etc. This could be done via
+direct polling (if you expose the endpoint) or via an internal process (even
+a concourse pipeline) which periodically polls the endpoint internally,
+adjusts as needed, then submits upstream to New Relic or similar.
 
 # References
 
