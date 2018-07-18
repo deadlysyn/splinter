@@ -32,6 +32,18 @@ function init(req, res, svc) {
     }
 }
 
+// generate random names for test tables, queues, etc.
+function randName() {
+    let name = 'splinter' // prefix
+    let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+
+    for (let i = 0; i < 8; i++) {
+        name += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+
+    return name
+}
+
 /* middleware */
 
 var middleware = {}
@@ -41,6 +53,7 @@ middleware.testMongo = (req, res, next) => {
     let Test = require('../models/mongoTest')
     let svc = req.app.locals.conf.mongoInstance
     let cfg = init(req, res, svc)
+    let name = randName()
 
     let cleanup = () => {
         Test.remove({}, () => {
@@ -53,12 +66,16 @@ middleware.testMongo = (req, res, next) => {
     let db = mongoose.connection
     db.on('error', (err) => handleErr(err, cfg, cleanup))
 
-    let testDoc = new Test({ 'timestamp': cfg.time })
+    let testDoc = new Test({
+        'name': name,
+        'timestamp': cfg.time
+    })
+
     testDoc.save((err) => {
         if (err) {
             handleErr(err, cfg, cleanup)
         } else {
-            Test.findOne({ name: 'splinter' }, (err, test) => {
+            Test.findOne({ name: name }, (err, test) => {
                 if (err) {
                     handleErr(err, cfg, cleanup)
                 } else {
@@ -79,7 +96,7 @@ middleware.testMysql = (req, res, next) => {
     let mysql = require('mysql')
     let svc = req.app.locals.conf.mysqlInstance
     let cfg = init(req, res, svc)
-    let tbl = 'splinter'
+    let tbl = randName()
 
     let cleanup = () => {
         db.query('DROP TABLE ??', tbl, () => {
@@ -122,7 +139,7 @@ middleware.testPostgres = (req, res, next) => {
     let pg = require('pg')
     let svc = req.app.locals.conf.postgresInstance
     let cfg = init(req, res, svc)
-    let tbl = 'splinter'
+    let tbl = randName()
 
     let cleanup = () => {
         db.query(`DROP TABLE ${tbl}`, () => {
@@ -166,7 +183,7 @@ middleware.testRabbit = (req, res, next) => {
     let rabbit = require('amqplib/callback_api')
     let svc = req.app.locals.conf.rabbitInstance
     let cfg = init(req, res, svc)
-    let q = 'splinter'
+    let q = randName()
 
     // may be called before conn or ch are defined
     let cleanup = () => {
@@ -218,7 +235,7 @@ middleware.testRedis = (req, res, next) => {
     let redis = require('redis')
     let svc = req.app.locals.conf.redisInstance
     let cfg = init(req, res, svc)
-    let q = 'splinter'
+    let q = randName()
 
     let cleanup = () => {
         client.quit()
