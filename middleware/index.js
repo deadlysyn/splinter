@@ -14,7 +14,7 @@ function handleErr(err, cfg, callback) {
     cfg.res.status(500)
     cfg.results.message = err.toString()
     cfg.req.app.locals.testResults[cfg.svc] = cfg.results
-    callback()
+    return callback()
 }
 
 // build config object for test
@@ -55,8 +55,8 @@ middleware.testMongo = (req, res, next) => {
     let cfg = init(req, res, svc)
     let name = randName()
 
-    let cleanup = () => {
-        Test.remove({}, () => {
+    let cleanup = _ => {
+        Test.remove({}, _ => {
             db.close()
             return next()
         })
@@ -93,45 +93,51 @@ middleware.testMongo = (req, res, next) => {
 }
 
 middleware.testMysql = (req, res, next) => {
-    let mysql = require('mysql')
     let svc = req.app.locals.conf.mysqlInstance
     let cfg = init(req, res, svc)
     let tbl = randName()
 
-    let cleanup = () => {
-        db.query('DROP TABLE ??', tbl, () => {
+    let mysql = require('mysql')
+    let db = mysql.createConnection(cfg.creds.uri)
+
+    let cleanup = _ => {
+        db.query('DROP TABLE ??', tbl, _ => {
             db.destroy()
             return next()
         })
     }
 
-    let db = mysql.createConnection(cfg.creds.uri)
-    db.on('error', (err) => handleErr(err, cfg, cleanup))
-
-    db.query('CREATE TABLE ?? (timestamp BIGINT)', tbl, (err) => {
+    db.connect((err) => {
         if (err) {
             handleErr(err, cfg, cleanup)
         } else {
-            db.query('INSERT INTO ?? (timestamp) VALUES(?)', [tbl, cfg.time], (err) => {
+            db.query('CREATE TABLE ?? (timestamp BIGINT)', tbl, (err) => {
                 if (err) {
                     handleErr(err, cfg, cleanup)
                 } else {
-                    db.query('SELECT timestamp FROM ?? LIMIT 1', tbl, (err, result) => {
+                    db.query('INSERT INTO ?? (timestamp) VALUES(?)', [tbl, cfg.time], (err) => {
                         if (err) {
                             handleErr(err, cfg, cleanup)
                         } else {
-                            if (result) {
-                                cfg.results.seconds_elapsed = (Date.now() - result[0].timestamp) / 1000
-                                req.app.locals.testResults[svc] = cfg.results
-                                cleanup()
-                            } else {
-                                handleErr('Error: No results from query', cfg, cleanup)
-                            }
+                            db.query('SELECT timestamp FROM ?? LIMIT 1', tbl, (err, result) => {
+                                if (err) {
+                                    handleErr(err, cfg, cleanup)
+                                } else {
+                                    if (result) {
+                                        cfg.results.seconds_elapsed = (Date.now() - result[0].timestamp) / 1000
+                                        req.app.locals.testResults[svc] = cfg.results
+                                        cleanup()
+                                    } else {
+                                        handleErr('Error: No results from query', cfg, cleanup)
+                                    }
+                                }
+                            })
                         }
                     })
                 }
             })
         }
+
     })
 }
 
@@ -141,8 +147,8 @@ middleware.testPostgres = (req, res, next) => {
     let cfg = init(req, res, svc)
     let tbl = randName()
 
-    let cleanup = () => {
-        db.query(`DROP TABLE ${tbl}`, () => {
+    let cleanup = _ => {
+        db.query(`DROP TABLE ${tbl}`, _ => {
             db.end()
             return next()
         })
@@ -186,8 +192,8 @@ middleware.testRabbit = (req, res, next) => {
     let q = randName()
 
     // may be called before conn or ch are defined
-    let cleanup = () => {
-        let finish = () => {
+    let cleanup = _ => {
+        let finish = _ => {
             try {
                 conn.close()
                 return next()
@@ -237,7 +243,7 @@ middleware.testRedis = (req, res, next) => {
     let cfg = init(req, res, svc)
     let q = randName()
 
-    let cleanup = () => {
+    let cleanup = _ => {
         client.quit()
         return next()
     }
