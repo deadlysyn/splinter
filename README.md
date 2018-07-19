@@ -1,22 +1,19 @@
 ![Picture of Master Splinter](https://github.com/deadlysyn/splinter/blob/master/assets/splinter.jpg)
 
-# Splinter: Cloud Foundry Service Smoke Tester
+# Splinter: Cloud Foundry Service Tester
 
 Inspired by prior art:
 
 - https://github.com/cloudfoundry/cf-smoke-tests
 - https://github.com/pivotal-cf/rabbit-labrat
 
-Simple idea to extend the above into a more generic and customizable service
-smoke test framework.
+If you have no automated testing, `cf-smoke-tests` is an excellent place to
+start. The next thing a platform team typically wants is a "synthetic test"
+based on a custom application leveraging shared services like MySQL or Redis
+(continuously validating developer experience).
 
-I've spoke to customers who had a desire for smoke tests above and
-beyond `cf-smoke-tests`. While an excellent place to start, the next thing a
-platform team typically wants is an extended smoke test based on a custom
-application leveraging shared services like MySQL, Redis, etc.
-
-Splinter is an attempt to meet that need. The idea is to provide a simple
-application allowing platform teams to easily and selectively exercise shared
+Splinter is an attempt to meet that need by providing a simple application
+allowing platform teams to easily and selectively exercise shared
 services. `cf-smoke-tests` can continue providing confidence in Cloud Foundry
 components while Splinter integrates with external monitoring to provide
 confidence in shared services.
