@@ -71,7 +71,7 @@ middleware.testMongo = (req, res, next) => {
         if (err) {
             handleErr(err, cfg, cleanup)
         } else {
-            testDoc.save((err) => {
+            testDoc.save(err => {
                 if (err) {
                     handleErr(err, cfg, cleanup)
                 } else {
@@ -109,15 +109,15 @@ middleware.testMysql = (req, res, next) => {
         })
     }
 
-    db.connect((err) => {
+    db.connect(err => {
         if (err) {
             handleErr(err, cfg, cleanup)
         } else {
-            db.query('CREATE TABLE ?? (timestamp BIGINT)', tbl, (err) => {
+            db.query('CREATE TABLE ?? (timestamp BIGINT)', tbl, err => {
                 if (err) {
                     handleErr(err, cfg, cleanup)
                 } else {
-                    db.query('INSERT INTO ?? (timestamp) VALUES(?)', [tbl, cfg.time], (err) => {
+                    db.query('INSERT INTO ?? (timestamp) VALUES(?)', [tbl, cfg.time], err => {
                         if (err) {
                             handleErr(err, cfg, cleanup)
                         } else {
@@ -144,10 +144,12 @@ middleware.testMysql = (req, res, next) => {
 }
 
 middleware.testPostgres = (req, res, next) => {
-    let pg = require('pg')
     let svc = req.app.locals.conf.postgresInstance
     let cfg = init(req, res, svc)
     let tbl = randName()
+
+    let pg = require('pg')
+    let db = new pg.Client({ connectionString: cfg.creds.uri })
 
     let cleanup = _ => {
         db.query(`DROP TABLE ${tbl}`, _ => {
@@ -156,29 +158,31 @@ middleware.testPostgres = (req, res, next) => {
         })
     }
 
-    let db = new pg.Client({ connectionString: cfg.creds.uri })
-    db.connect()
-    db.on('error', (err) => handleErr(err, cfg, cleanup))
-
-    db.query(`CREATE TABLE ${tbl} (timestamp BIGINT)`, (err) => {
+    db.connect(err => {
         if (err) {
             handleErr(err, cfg, cleanup)
         } else {
-            db.query(`INSERT INTO ${tbl} (timestamp) VALUES($1)`, [cfg.time], (err) => {
+            db.query(`CREATE TABLE ${tbl} (timestamp BIGINT)`, err => {
                 if (err) {
                     handleErr(err, cfg, cleanup)
                 } else {
-                    db.query(`SELECT timestamp FROM ${tbl} LIMIT 1`, (err, result) => {
+                    db.query(`INSERT INTO ${tbl} (timestamp) VALUES($1)`, [cfg.time], err => {
                         if (err) {
                             handleErr(err, cfg, cleanup)
                         } else {
-                            if (result) {
-                                cfg.results.seconds_elapsed = (Date.now() - result.rows[0].timestamp) / 1000
-                                req.app.locals.testResults[svc] = cfg.results
-                                cleanup()
-                            } else {
-                                handleErr('Error: No results from query', cfg, cleanup)
-                            }
+                            db.query(`SELECT timestamp FROM ${tbl} LIMIT 1`, (err, result) => {
+                                if (err) {
+                                    handleErr(err, cfg, cleanup)
+                                } else {
+                                    if (result) {
+                                        cfg.results.seconds_elapsed = (Date.now() - result.rows[0].timestamp) / 1000
+                                        req.app.locals.testResults[svc] = cfg.results
+                                        cleanup()
+                                    } else {
+                                        handleErr('Error: No results from query', cfg, cleanup)
+                                    }
+                                }
+                            })
                         }
                     })
                 }
@@ -188,10 +192,11 @@ middleware.testPostgres = (req, res, next) => {
 }
 
 middleware.testRabbit = (req, res, next) => {
-    let rabbit = require('amqplib/callback_api')
     let svc = req.app.locals.conf.rabbitInstance
     let cfg = init(req, res, svc)
     let q = randName()
+
+    let rabbit = require('amqplib/callback_api')
 
     // may be called before conn or ch are defined
     let cleanup = _ => {
@@ -204,7 +209,7 @@ middleware.testRabbit = (req, res, next) => {
             }
         }
         try {
-            ch.deleteQueue(q, {}, function(err, ok) {
+            ch.deleteQueue(q, {}, (err, ok) => {
                 finish()
             })
         } catch(err) {
@@ -212,20 +217,20 @@ middleware.testRabbit = (req, res, next) => {
         }
     }
 
-    rabbit.connect(cfg.creds.uri, { noDelay: true }, function(err, conn) {
+    rabbit.connect(cfg.creds.uri, { noDelay: true }, (err, conn) => {
         if (err) {
             handleErr(err, cfg, cleanup)
         } else {
-            conn.createChannel(function(err, ch) {
+            conn.createChannel((err, ch) => {
                 if (err) {
                     handleErr(err, cfg, cleanup)
                 } else {
-                    ch.assertQueue(q, { exclusive: true, autoDelete: true }, function(err, ok) {
+                    ch.assertQueue(q, { exclusive: true, autoDelete: true }, (err, ok) => {
                         if (err) {
                             handleErr(err, cfg, cleanup)
                         } else {
                             ch.sendToQueue(q, Buffer.from(cfg.time.toString()))
-                            ch.consume(q, function(msg) {
+                            ch.consume(q, (msg) => {
                                 cfg.results.seconds_elapsed = (Date.now() - Number(msg.content.toString())) / 1000
                                 req.app.locals.testResults[svc] = cfg.results
                                 ch.ackAll()
@@ -240,25 +245,24 @@ middleware.testRabbit = (req, res, next) => {
 }
 
 middleware.testRedis = (req, res, next) => {
-    let redis = require('redis')
     let svc = req.app.locals.conf.redisInstance
     let cfg = init(req, res, svc)
     let q = randName()
+
+    let redis = require('redis')
+    let client = redis.createClient({
+        host:       cfg.creds.hostname,
+        port:       cfg.creds.port,
+        password:   cfg.creds.password
+    })
 
     let cleanup = _ => {
         client.quit()
         return next()
     }
 
-    let client = redis.createClient({
-        host:       cfg.creds.hostname,
-        port:       cfg.creds.port,
-        password:   cfg.creds.password
-    })
     client.on('error', (err) => handleErr(err, cfg, cleanup))
-
     client.set(q, cfg.time, 'EX', 30) // expire after 30 seconds
-
     client.get(q, (err, timestamp) => {
         if (err) {
             handleErr(err, cfg, cleanup)

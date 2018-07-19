@@ -8,7 +8,7 @@ const configFile = path.join(__dirname, process.env.CONF)
 const ip = process.env.IP || '0.0.0.0'
 const port = parseInt(process.env.PORT, 10) || 3000
 
-app.use(function (req, res, next) {
+app.use((req, res, next) => {
     if (!req.app.locals.testResults) {
         // hold aggregated test results
         req.app.locals.testResults = {}
@@ -40,17 +40,17 @@ if (tests.length == 0) {
 }
 
 // routes
-app.get('/', tests, function(req, res, next) {
+app.get('/', tests, (req, res, next) => {
     res.json({
         'timestamp': new Date().toJSON(),
         'results': req.app.locals.testResults
     })
 })
 
-app.all('*', function(req, res, next) {
+app.all('*', (req, res, next) => {
     res.status(404).json({ 'message': 'Page not found.' })
 })
 
-app.listen(port, ip, function() {
+app.listen(port, ip, _ => {
     console.log('listening on ' + ip + ':' + port)
 })

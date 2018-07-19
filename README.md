@@ -10,16 +10,16 @@ Inspired by prior art:
 Simple idea to extend the above into a more generic and customizable service
 smoke test framework.
 
-I've spoke to a couple customers who had a desire for smoke tests above and
+I've spoke to customers who had a desire for smoke tests above and
 beyond `cf-smoke-tests`. While an excellent place to start, the next thing a
 platform team typically wants is an extended smoke test based on a custom
 application leveraging shared services like MySQL, Redis, etc.
 
-Splinter is an attempt to meet that need. The idea is to provide a single
-application and sample Concourse pipeline allowing platform teams to easily
-and selectively exercise shared services. `cf-smoke-tests` can continue
-providing confidence in Cloud Foundry components while Splinter integrates
-with external monitoring to provide confidence in shared services.
+Splinter is an attempt to meet that need. The idea is to provide a simple
+application allowing platform teams to easily and selectively exercise shared
+services. `cf-smoke-tests` can continue providing confidence in Cloud Foundry
+components while Splinter integrates with external monitoring to provide
+confidence in shared services.
 
 # Overview
 For each service enabled in the configuration (see `sample-config.json`):
