@@ -1,7 +1,6 @@
 ---
 applications:
   - name: splinter
-    # buildpack: https://github.com/cloudfoundry/nodejs-buildpack#v1.6.24
     command: node app.js
     memory: 64M
     instances: 1
