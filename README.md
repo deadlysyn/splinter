@@ -2,6 +2,8 @@
 
 # Splinter: Cloud Foundry Service Tester
 
+__NOTE:*Apologies, this is currently broken...  started refactoring to support Prometheus vs JSON output on a plane, but distracted with other things right now.  Should have used a branch. :-(__
+
 Inspired by prior art:
 
 - https://github.com/cloudfoundry/cf-smoke-tests
