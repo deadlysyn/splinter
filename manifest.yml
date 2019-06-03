@@ -2,7 +2,7 @@
 applications:
   - name: splinter
     command: node app.js
-    memory: 64M
+    memory: 256M
     instances: 1
     services:
       - my-mongodb
