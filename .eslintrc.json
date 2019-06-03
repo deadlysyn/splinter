@@ -3,15 +3,12 @@
     "es6": true,
     "node": true
   },
-  "extends": "eslint:recommended",
+  "extends": ["airbnb", "prettier"],
+  "plugins": ["prettier"],
   "parserOptions": {
     "ecmaVersion": 2015
   },
   "rules": {
-    "indent": ["error", 4],
-    "linebreak-style": ["error", "unix"],
-    "quotes": ["warn", "single"],
-    "semi": ["warn", "never"],
-    "no-console": "off"
+    "prettier/prettier": ["error"]
   }
 }
