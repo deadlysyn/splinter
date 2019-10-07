@@ -1,12 +1,34 @@
+root: true
 env:
+  es6: true
   browser: true
   commonjs: true
-  es6: true
+  node: true
+  jest: true
 extends:
   - airbnb-base
+  - prettier
+plugins:
+  - prettier
 globals:
   Atomics: readonly
   SharedArrayBuffer: readonly
 parserOptions:
   ecmaVersion: 2018
-rules: {}
+rules:
+  prettier/prettier:
+    - error
+  func-names:
+    - warn
+    - as-needed
+  no-console: 0
+  no-shadow: 0
+  consistent-return: 0
+  no-const-assign: warn
+  no-plusplus: 0
+  no-this-before-super: warn
+  no-undef: warn
+  no-unreachable: warn
+  no-unused-vars: warn
+  constructor-super: warn
+  valid-typeof: warn
