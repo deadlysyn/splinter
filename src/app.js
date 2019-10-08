@@ -12,10 +12,11 @@ app.locals.tests = enabledTests
 
 app.get('/', tests, (req, res, next) => {
   if (enabledTests.length === 0) {
-    req.app.locals.testResults = { message: 'No tests enabled.' }
+    res.send({
+      results: { message: 'No tests enabled.' },
+    })
   }
   res.send({
-    timestamp: new Date().toJSON(),
     results: req.app.locals.testResults,
   })
 })
