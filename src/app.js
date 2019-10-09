@@ -1,30 +1,23 @@
 const express = require('express')
-const enabledTests = require('./util/config')
-const m = require('./middleware')
+const enabledTests = require('./util/readConfig')
+const run = require('./util/runTests')
 
 const app = express()
 
-const ip = process.env.IP || '0.0.0.0'
-const port = process.env.PORT || 3000
-
 app.use(express.json())
-app.locals.tests = enabledTests
 
-app.get('/', tests, (req, res, next) => {
+app.get('/', async (req, res, next) => {
   if (enabledTests.length === 0) {
-    res.send({
+    return res.send({
       results: { message: 'No tests enabled.' },
     })
   }
-  res.send({
-    results: req.app.locals.testResults,
-  })
+  const results = await run(enabledTests)
+  res.send({ results })
 })
 
 app.all('*', (req, res, next) => {
-  res.status(404).json({ message: 'Page not found.' })
+  res.status(404).json({ message: 'Invalid route.' })
 })
 
-app.listen(port, ip, () => {
-  console.log(`listening on ${ip}:${port}`)
-})
+module.exports = app
