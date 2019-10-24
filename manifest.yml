@@ -1,20 +1,19 @@
 ---
 applications:
   - name: splinter
-    command: node app.js
+    command: node src/server.js
     memory: 256M
     instances: 1
     services:
       - my-mongodb
-      - my-mysql
-      - my-postgres
-      - my-rabbitmq
-      - my-redis
+      # - my-mysql
+      # - my-postgres
+      # - my-rabbitmq
+      # - my-redis
     routes:
       - route: splinter.cfapps.io
     env:
-      CONF: sample-config.json
+      CONFIG: sample-config.yml
       NODE_MODULES_CACHE: false
       NODE_VERBOSE: true
-      # NPM_CONFIG_LOGLEVEL: silly
       OPTIMIZE_MEMORY: true
