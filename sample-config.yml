@@ -1,16 +1,17 @@
+---
 tests:
-  - name: mongo
+  - name: mongodb
     enabled: true
     instance: my-mongodb
-#   - name: mysql
-#     enabled: false
-#     instance: my-mysql
-#   - name: postgres
-#     enabled: false
-#     instance: my-postgres
-#   - name: rabbit
-#     enabled: true
-#     instance: my-rabbitmq
-#   - name: redis
-#     enabled: true
-#     instance: my-redis
+  - name: mysql
+    enabled: false
+    instance: my-mysql
+  - name: postgresql
+    enabled: false
+    instance: my-postgres
+  - name: rabbitmq
+    enabled: false
+    instance: my-rabbitmq
+  - name: redis
+    enabled: false
+    instance: my-redis
