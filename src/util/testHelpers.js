@@ -6,7 +6,8 @@ const appEnv = cfenv.getAppEnv({
 })
 
 // build config object for test
-function init(instance) {
+const init = instance => {
+  console.log(`INFO - testing ${instance}`)
   return {
     creds: appEnv.getServiceCreds(instance),
     time: Date.now(),
