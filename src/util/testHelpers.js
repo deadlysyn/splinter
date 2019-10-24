@@ -15,7 +15,4 @@ const init = instance => {
   }
 }
 
-module.eports = {
-  appEnv,
-  init,
-}
+module.exports = init
