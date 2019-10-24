@@ -1,19 +1,21 @@
 const uuid = require('uuid/v1')
 const mongoose = require('mongoose')
 const Test = require('../../models/mongoTest')
-const util = require('../util/testHelpers')
+const init = require('../util/testHelpers')
 
 // run after each test
 const cleanup = async () => {
-  await Test.remove({})
+  await Test.deleteMany({})
   mongoose.connection.close()
 }
 
 const testMongo = async instance => {
-  const config = util.init(instance)
+  const config = init(instance)
   const name = uuid()
 
   try {
+    // TODO: this doesn't seem handled, check docs for examples
+    // UnhandledPromiseRejectionWarning: MongoNetworkError: failed to connect to server [ds257470.mlab.com:57470] on first connect [MongoNetworkError: getaddrinfo EAI_AGAIN ds257470.mlab.com ds257470.mlab.com:57470]
     mongoose.connect(config.creds.uri, {
       useNewUrlParser: true,
       bufferCommands: false,
