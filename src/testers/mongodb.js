@@ -3,46 +3,42 @@ const mongoose = require('mongoose')
 const Test = require('../../models/mongoTest')
 const util = require('../util/testHelpers')
 
-const testMongo = (req, res, next) => {
-  const svc = req.app.locals.conf.mongoInstance
-  const cfg = init(req, res, svc)
+// run after each test
+const cleanup = async () => {
+  await Test.remove({})
+  mongoose.connection.close()
+}
+
+const testMongo = async instance => {
+  const config = util.init(instance)
   const name = uuid()
 
-  const testDoc = new Test({
-    name,
-    timestamp: cfg.time,
-  })
-
-  const cleanup = () => {
-    Test.remove({}, () => {
-      mongoose.connection.close()
-      return next()
+  try {
+    mongoose.connect(config.creds.uri, {
+      useNewUrlParser: true,
+      bufferCommands: false,
+      useCreateIndex: true,
+      useFindAndModify: false,
     })
+
+    const testDoc = new Test({
+      name,
+      time: config.time,
+    })
+    await testDoc.save()
+
+    const test = await Test.findOne({ name })
+    if (test) {
+      config.results.secondsElapsed = (Date.now() - test.time) / 1000
+    }
+  } catch (e) {
+    console.log(e)
+    config.results.message = e.message
+  } finally {
+    cleanup()
   }
 
-  mongoose.connect(cfg.creds.uri, { bufferCommands: false }, err => {
-    if (err) {
-      handleErr(err, cfg, cleanup)
-    } else {
-      testDoc.save(err => {
-        if (err) {
-          handleErr(err, cfg, cleanup)
-        } else {
-          Test.findOne({ name }, (err, test) => {
-            if (err) {
-              handleErr(err, cfg, cleanup)
-            } else if (test) {
-              cfg.results.seconds_elapsed = (Date.now() - test.timestamp) / 1000
-              req.app.locals.testResults[svc] = cfg.results
-              cleanup()
-            } else {
-              handleErr('Error: No document found', cfg, cleanup)
-            }
-          })
-        }
-      })
-    }
-  })
+  return config.results
 }
 
 module.exports = testMongo
