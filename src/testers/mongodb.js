@@ -21,6 +21,7 @@ const testMongo = async instance => {
       bufferCommands: false,
       useCreateIndex: true,
       useFindAndModify: false,
+      useUnifiedTopology: true,
     })
 
     const testDoc = new Test({
