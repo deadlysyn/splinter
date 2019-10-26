@@ -1,6 +1,6 @@
 const uuid = require('uuid/v1')
 const rabbit = require('amqplib/callback_api')
-const util = require('../util/testHelpers')
+const util = require('../util/helpers')
 
 const testRabbit = (req, res, next) => {
   const svc = req.app.locals.conf.rabbitInstance
