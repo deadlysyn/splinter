@@ -1,9 +1,9 @@
+const enabledTests = require('../util/readConfig')
 const testMongo = require('../testers/mongodb')
 const testMysql = require('../testers/mysql')
 const testPostgres = require('../testers/postgresql')
 const testRabbit = require('../testers/rabbitmq')
 const testRedis = require('../testers/redis')
-const enabledTests = require('../util/readConfig')
 
 const run = async test => {
   // https://ultimatecourses.com/blog/deprecating-the-switch-statement-for-object-literals
@@ -14,7 +14,9 @@ const run = async test => {
     rabbitmq: testRabbit,
     redis: testRedis,
   }
+
   console.log(`INFO - running test:${test.name} on instance:${test.instance}`)
+
   return tests[test.name](test.instance)
 }
 
