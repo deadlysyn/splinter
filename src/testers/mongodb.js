@@ -1,7 +1,7 @@
 const uuid = require('uuid/v1')
-const mongoose = require('mongoose')
+const { mongoose, dbConnect } = require('../db/mongoose')
 const Test = require('../../models/mongoTest')
-const init = require('../util/testHelpers')
+const { init, getCreds } = require('../util/helpers')
 
 // run after each test
 const cleanup = async () => {
@@ -10,38 +10,30 @@ const cleanup = async () => {
 }
 
 const testMongo = async instance => {
-  const config = init(instance)
+  const testState = init()
   const name = uuid()
 
-  try {
-    // TODO: this doesn't seem handled, check docs for examples
-    // UnhandledPromiseRejectionWarning: MongoNetworkError: failed to connect to server [ds257470.mlab.com:57470] on first connect [MongoNetworkError: getaddrinfo EAI_AGAIN ds257470.mlab.com ds257470.mlab.com:57470]
-    mongoose.connect(config.creds.uri, {
-      useNewUrlParser: true,
-      bufferCommands: false,
-      useCreateIndex: true,
-      useFindAndModify: false,
-      useUnifiedTopology: true,
-    })
+  await dbConnect(getCreds(instance))
 
+  try {
     const testDoc = new Test({
       name,
-      time: config.time,
+      time: testState.time,
     })
     await testDoc.save()
 
     const test = await Test.findOne({ name })
     if (test) {
-      config.results.secondsElapsed = (Date.now() - test.time) / 1000
+      testState.results.secondsElapsed = (Date.now() - test.time) / 1000
     }
   } catch (e) {
     console.log(e)
-    config.results.message = e.message
+    testState.results.message = e.message
   } finally {
     cleanup()
   }
 
-  return config.results
+  return testState.results
 }
 
 module.exports = testMongo
