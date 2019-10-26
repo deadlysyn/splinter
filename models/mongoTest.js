@@ -5,8 +5,9 @@ const testSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  timestamp: {
+  time: {
     type: Number,
+    required: true,
     default: 0,
   },
 })
