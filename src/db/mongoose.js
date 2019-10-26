@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
 
-const dbConnect = async instance => {
+const dbConnect = async credentials => {
   try {
-    await mongoose.connect(config.creds.uri, {
+    await mongoose.connect(credentials.uri, {
       useNewUrlParser: true,
       bufferCommands: false,
       useCreateIndex: true,
