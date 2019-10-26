@@ -1,22 +1,15 @@
 const express = require('express')
-const enabledTests = require('./util/readConfig')
-const run = require('./util/runTests')
+const runTests = require('./util/runTests')
 
 const app = express()
-
 app.use(express.json())
 
-app.get('/', async (req, res, next) => {
-  if (enabledTests.length === 0) {
-    return res.send({
-      results: { message: 'No tests enabled.' },
-    })
-  }
-  const results = await run(enabledTests)
-  res.send({ results })
+app.get('/', runTests, (req, res, next) => {
+  // TODO: change status if any test fails
+  res.send(res.locals.testResults)
 })
 
-app.all('*', (req, res, next) => {
+app.all('*', (req, res) => {
   res.status(404).json({ message: 'Invalid route.' })
 })
 
