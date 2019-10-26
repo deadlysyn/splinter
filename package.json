@@ -1,8 +1,8 @@
 {
     "name": "splinter",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Cloud Foundry Smoke Test Framework",
-    "main": "app.js",
+    "main": "server.js",
     "scripts": {
         "start": "node src/server.js",
         "dev": "nodemon src/server.js",
@@ -22,17 +22,18 @@
     },
     "homepage": "https://gitlab.com/deadlysyn/splinter#readme",
     "engines": {
-        "node": "10.16.3"
+        "node": "12.13.0",
+        "npm": "6.12.0"
     },
     "dependencies": {
-        "amqplib": "^0.5.3",
+        "amqplib": "^0.5.5",
         "cfenv": "^1.2.2",
-        "express": "^4.16.4",
+        "express": "^4.17.1",
         "fs": "0.0.1-security",
         "js-yaml": "^3.13.1",
-        "mongoose": "^5.4.16",
-        "mysql": "^2.16.0",
-        "pg": "^7.8.1",
+        "mongoose": "^5.7.7",
+        "mysql": "^2.17.1",
+        "pg": "^7.12.1",
         "redis": "^2.8.0",
         "uuid": "^3.3.3"
     },
@@ -47,7 +48,7 @@
         "eslint-plugin-react": "^7.16.0",
         "eslint-plugin-react-hooks": "^1.7.0",
         "jest": "^24.9.0",
-        "nodemon": "^1.19.3",
+        "nodemon": "^1.19.4",
         "prettier": "^1.18.2",
         "supertest": "^4.0.2"
     }
