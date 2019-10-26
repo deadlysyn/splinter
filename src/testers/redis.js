@@ -1,6 +1,6 @@
 const uuid = require('uuid/v1')
 const redis = require('redis')
-const util = require('../util/testHelpers')
+const util = require('../util/helpers')
 
 const testRedis = (req, res, next) => {
   const svc = req.app.locals.conf.redisInstance

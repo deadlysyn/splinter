@@ -1,6 +1,6 @@
 const uuid = require('uuid/v1')
 const pg = require('pg')
-const util = require('../util/testHelpers')
+const util = require('../util/helpers')
 
 const testPostgres = (req, res, next) => {
   const svc = req.app.locals.conf.postgresInstance

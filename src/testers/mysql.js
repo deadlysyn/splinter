@@ -1,6 +1,6 @@
 const uuid = require('uuid/v1')
 const mysql = require('mysql')
-const util = require('../util/testHelpers')
+const util = require('../util/helpers')
 
 const testMysql = (req, res, next) => {
   const svc = req.app.locals.conf.mysqlInstance
