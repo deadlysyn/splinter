@@ -3,32 +3,38 @@ const testMysql = require('../testers/mysql')
 const testPostgres = require('../testers/postgresql')
 const testRabbit = require('../testers/rabbitmq')
 const testRedis = require('../testers/redis')
+const enabledTests = require('../util/readConfig')
 
-const runTests = enabledTests => {
-  // default OK unless we get errors from tests
-  const results = { message: 'OK', status: 200 }
-  enabledTests.forEach(async test => {
-    switch (test.name) {
-      case 'mongodb':
-        results.mongodb = await testMongo(test.instance)
-        break
-      case 'mysql':
-        results.mysql = await testMysql(test.instance)
-        break
-      case 'postgresql':
-        results.postgresql = await testPostgres(test.instance)
-        break
-      case 'rabbitmq':
-        results.rabbitmq = await testRabbit(test.instance)
-        break
-      case 'redis':
-        results.redis = await testRedis(test.instance)
-        break
-      default:
-        console.log(`ERROR - ${test.name} is not a valid test name`)
-    }
-  })
-  return results
+const run = async test => {
+  // https://ultimatecourses.com/blog/deprecating-the-switch-statement-for-object-literals
+  const tests = {
+    mongodb: testMongo,
+    mysql: testMysql,
+    postgresql: testPostgres,
+    rabbitmq: testRabbit,
+    redis: testRedis,
+  }
+  console.log(`INFO - running test:${test.name} on instance:${test.instance}`)
+  return tests[test.name](test.instance)
+}
+
+const runTests = async (req, res, next) => {
+  res.locals.testResults = []
+
+  if (enabledTests.length === 0) {
+    res.locals.testResults.push({ message: 'No tests enabled.' })
+    return next()
+  }
+
+  // https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
+  /* eslint-disable no-restricted-syntax */
+  /* eslint-disable no-await-in-loop */
+  for (const test of enabledTests) {
+    const result = await run(test)
+    res.locals.testResults.push(result)
+  }
+
+  next()
 }
 
 module.exports = runTests
