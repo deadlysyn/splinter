@@ -1,50 +1,34 @@
 const uuid = require('uuid/v1')
-const mysql = require('mysql')
-const util = require('../util/helpers')
+const dbConnect = require('../db/mysql')
+const { init, getCreds } = require('../util/helpers')
 
-const testMysql = (req, res, next) => {
-  const svc = req.app.locals.conf.mysqlInstance
-  const cfg = init(req, res, svc)
-  const tbl = randName()
+const testMysql = async instance => {
+  const testState = init()
+  const table = uuid()
+  const db = await dbConnect(getCreds(instance))
 
-  const db = mysql.createConnection(cfg.creds.uri)
+  // not fully preparing statements since data is trusted
+  const queryCreate = `CREATE TABLE IF NOT EXISTS \`${table}\` (time BIGINT)`
+  const queryInsert = `INSERT INTO \`${table}\` (time) VALUES (${testState.time})`
+  const querySelect = `SELECT time FROM \`${table}\` LIMIT 1`
+  const queryDrop = `DROP TABLE \`${table}\``
 
-  const cleanup = _ => {
-    db.query('DROP TABLE ??', tbl, () => {
-      db.destroy()
-      return next()
-    })
+  try {
+    await db.query(queryCreate)
+    await db.query(queryInsert)
+    const [rows, fields] = await db.query(querySelect)
+    if (rows) {
+      testState.results.secondsElapsed = (Date.now() - rows[0].time) / 1000
+    }
+  } catch (error) {
+    console.log(`ERROR - ${error.message}`)
+    testState.results.message = error.message
+  } finally {
+    await db.query(queryDrop)
+    await db.destroy()
   }
 
-  db.connect(err => {
-    if (err) {
-      handleErr(err, cfg, cleanup)
-    } else {
-      db.query('CREATE TABLE ?? (timestamp BIGINT)', tbl, err => {
-        if (err) {
-          handleErr(err, cfg, cleanup)
-        } else {
-          db.query('INSERT INTO ?? (timestamp) VALUES(?)', [tbl, cfg.time], err => {
-            if (err) {
-              handleErr(err, cfg, cleanup)
-            } else {
-              db.query('SELECT timestamp FROM ?? LIMIT 1', tbl, (err, result) => {
-                if (err) {
-                  handleErr(err, cfg, cleanup)
-                } else if (result) {
-                  cfg.results.seconds_elapsed = (Date.now() - result[0].timestamp) / 1000
-                  req.app.locals.testResults[svc] = cfg.results
-                  cleanup()
-                } else {
-                  handleErr('Error: No results from query', cfg, cleanup)
-                }
-              })
-            }
-          })
-        }
-      })
-    }
-  })
+  return testState.results
 }
 
 module.exports = testMysql
