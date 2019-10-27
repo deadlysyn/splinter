@@ -4,7 +4,7 @@ const Test = require('../../models/mongoTest')
 const { init, getCreds } = require('../util/helpers')
 
 const testMongo = async instance => {
-  const testState = init()
+  const testState = init(instance)
   const name = uuid()
 
   await dbConnect(getCreds(instance))

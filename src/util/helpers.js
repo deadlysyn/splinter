@@ -11,10 +11,13 @@ const getCreds = instance => {
 }
 
 // instantite object to hold test state
-const init = () => {
+const init = instance => {
   return {
     time: Date.now(),
-    results: { message: 'OK' },
+    results: {
+      instance,
+      message: 'OK',
+    },
   }
 }
 

@@ -3,7 +3,7 @@ const dbConnect = require('../db/mysql')
 const { init, getCreds } = require('../util/helpers')
 
 const testMysql = async instance => {
-  const testState = init()
+  const testState = init(instance)
   const table = uuid()
   const db = await dbConnect(getCreds(instance))
 
