@@ -3,12 +3,6 @@ const { mongoose, dbConnect } = require('../db/mongoose')
 const Test = require('../../models/mongoTest')
 const { init, getCreds } = require('../util/helpers')
 
-// run after each test
-const cleanup = async () => {
-  await Test.deleteMany({})
-  mongoose.connection.close()
-}
-
 const testMongo = async instance => {
   const testState = init()
   const name = uuid()
@@ -30,7 +24,8 @@ const testMongo = async instance => {
     console.log(`ERROR - ${error.message}`)
     testState.results.message = error.message
   } finally {
-    cleanup()
+    await Test.deleteMany({})
+    await mongoose.connection.close()
   }
 
   return testState.results
