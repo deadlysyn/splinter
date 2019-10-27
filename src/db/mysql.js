@@ -8,7 +8,6 @@ const dbConnect = async credentials => {
       password: credentials.password,
       database: credentials.name,
     })
-    // await db.connect()
     return db
   } catch (error) {
     console.log(`ERROR - ${error.message}`)
