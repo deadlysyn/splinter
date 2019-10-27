@@ -4,7 +4,7 @@ tests:
     enabled: true
     instance: my-mongodb
   - name: mysql
-    enabled: false
+    enabled: true
     instance: my-mysql
   - name: postgresql
     enabled: false
