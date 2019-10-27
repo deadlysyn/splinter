@@ -26,9 +26,9 @@ const testMongo = async instance => {
     if (test) {
       testState.results.secondsElapsed = (Date.now() - test.time) / 1000
     }
-  } catch (e) {
-    console.log(e)
-    testState.results.message = e.message
+  } catch (error) {
+    console.log(`ERROR - ${error.message}`)
+    testState.results.message = error.message
   } finally {
     cleanup()
   }
