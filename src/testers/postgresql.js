@@ -1,50 +1,33 @@
 const uuid = require('uuid/v1')
-const pg = require('pg')
-const util = require('../util/helpers')
+const dbConnect = require('../db/postgresql')
+const { init, getCreds } = require('../util/helpers')
 
-const testPostgres = (req, res, next) => {
-  const svc = req.app.locals.conf.postgresInstance
-  const cfg = init(req, res, svc)
-  const tbl = randName()
+const testPostgres = async instance => {
+  const testState = init(instance)
+  const table = uuid()
+  const db = await dbConnect(getCreds(instance))
 
-  const db = new pg.Client({ connectionString: cfg.creds.uri })
+  const queryCreate = `CREATE TABLE IF NOT EXISTS "${table}" (time BIGINT)`
+  const queryInsert = `INSERT INTO "${table}" (time) VALUES($1)`
+  const querySelect = `SELECT time FROM "${table}" LIMIT 1`
+  const queryDrop = `DROP TABLE "${table}"`
 
-  const cleanup = _ => {
-    db.query(`DROP TABLE ${tbl}`, () => {
-      db.end()
-      return next()
-    })
+  try {
+    await db.query(queryCreate)
+    await db.query(queryInsert, [testState.time])
+    const result = await db.query(querySelect)
+    if (result) {
+      testState.results.secondsElapsed = (Date.now() - result.rows[0].time) / 1000
+    }
+  } catch (error) {
+    console.log(`ERROR - ${error.stack}`)
+    testState.results.message = error.message
+  } finally {
+    await db.query(queryDrop)
+    await db.end()
   }
 
-  db.connect(err => {
-    if (err) {
-      handleErr(err, cfg, cleanup)
-    } else {
-      db.query(`CREATE TABLE ${tbl} (timestamp BIGINT)`, err => {
-        if (err) {
-          handleErr(err, cfg, cleanup)
-        } else {
-          db.query(`INSERT INTO ${tbl} (timestamp) VALUES($1)`, [cfg.time], err => {
-            if (err) {
-              handleErr(err, cfg, cleanup)
-            } else {
-              db.query(`SELECT timestamp FROM ${tbl} LIMIT 1`, (err, result) => {
-                if (err) {
-                  handleErr(err, cfg, cleanup)
-                } else if (result) {
-                  cfg.results.seconds_elapsed = (Date.now() - result.rows[0].timestamp) / 1000
-                  req.app.locals.testResults[svc] = cfg.results
-                  cleanup()
-                } else {
-                  handleErr('Error: No results from query', cfg, cleanup)
-                }
-              })
-            }
-          })
-        }
-      })
-    }
-  })
+  return testState.results
 }
 
 module.exports = testPostgres
