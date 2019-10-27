@@ -7,7 +7,7 @@ tests:
     enabled: true
     instance: my-mysql
   - name: postgresql
-    enabled: false
+    enabled: true
     instance: my-postgres
   - name: rabbitmq
     enabled: false
