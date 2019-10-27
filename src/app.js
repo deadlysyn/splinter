@@ -10,7 +10,7 @@ app.get('/', runTests, (req, res, next) => {
 })
 
 app.all('*', (req, res) => {
-  res.status(404).json({ message: 'Invalid route.' })
+  res.status(404).json({ message: 'Invalid request.' })
 })
 
 module.exports = app
