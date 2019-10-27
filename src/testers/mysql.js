@@ -25,7 +25,7 @@ const testMysql = async instance => {
     testState.results.message = error.message
   } finally {
     await db.query(queryDrop)
-    await db.destroy()
+    await db.end()
   }
 
   return testState.results
