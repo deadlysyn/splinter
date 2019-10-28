@@ -1,4 +1,4 @@
-![Picture of Master Splinter](https://gitlab.com/deadlysyn/splinter/blob/ad90ab6ff95e50840ccd20916d97da4417e0a9c0/assets/splinter.jpg)
+![Picture of Master Splinter](https://gitlab.com/deadlysyn/splinter/raw/ad90ab6ff95e50840ccd20916d97da4417e0a9c0/assets/splinter.jpg)
 
 # Splinter: Cloud Foundry Service Tester
 
