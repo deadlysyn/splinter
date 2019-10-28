@@ -1,18 +1,17 @@
-![Picture of Master Splinter](https://github.com/deadlysyn/splinter/blob/master/assets/splinter.jpg)
+![Picture of Master Splinter](https://gitlab.com/deadlysyn/splinter/blob/master/assets/splinter.jpg)
 
 # Splinter: Cloud Foundry Service Tester
-
-__NOTE:*Apologies, this is currently broken...  started refactoring to support Prometheus vs JSON output on a plane, but distracted with other things right now.  Should have used a branch. :-(__
 
 Inspired by prior art:
 
 - https://github.com/cloudfoundry/cf-smoke-tests
 - https://github.com/pivotal-cf/rabbit-labrat
 
-If you have no automated testing, `cf-smoke-tests` is an excellent place to
-start. The next thing a platform team typically wants is a "synthetic test"
-based on a custom application leveraging shared services like MySQL or Redis
-(continuously validating developer experience).
+If you have no automated platform testing,
+[cf-smoke-tests](https://github.com/cloudfoundry/cf-smoke-tests)
+is an excellent place to start. The next thing a platform team typically
+wants is a "synthetic test suite" based on a custom application leveraging
+shared services such as MySQL or Redis to continuously validate user experience.
 
 Splinter is an attempt to meet that need by providing a simple application
 allowing platform teams to easily and selectively exercise shared
@@ -21,7 +20,7 @@ components while Splinter integrates with external monitoring to provide
 confidence in shared services.
 
 # Overview
-For each service enabled in the configuration (see `sample-config.json`):
+For each service enabled in the configuration (see `sample-config.yml`):
 
 - Get instance name from configuration
 - Auto-discover service details from environment (uri, password, etc)
