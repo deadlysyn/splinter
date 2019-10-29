@@ -18,6 +18,7 @@ const publishMessage = ({ channel, exchange, key, data }) => {
 const consumeMessage = ({ connection, channel, queue }) => {
   return new Promise((resolve, reject) => {
     channel.consume(queue, async message => {
+      // https://github.com/squaremo/amqp.node/issues/176
       if (message) {
         const time = Number(message.content.toString())
         await channel.ack(message)
