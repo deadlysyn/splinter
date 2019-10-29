@@ -13,7 +13,7 @@ applications:
     routes:
       - route: splinter.cfapps.io
     env:
-      CONFIG: sample-config.yml
+      CONFIG: sampleConfig.yml
       NODE_MODULES_CACHE: false
       NODE_VERBOSE: true
       OPTIMIZE_MEMORY: true
