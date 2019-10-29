@@ -10,7 +10,7 @@ tests:
     enabled: true
     instance: my-postgres
   - name: rabbitmq
-    enabled: false
+    enabled: true
     instance: my-rabbitmq
   - name: redis
     enabled: false
