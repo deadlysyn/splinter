@@ -28,15 +28,18 @@ const runTests = async (req, res, next) => {
     return next()
   }
 
-  // https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
-  /* eslint-disable no-restricted-syntax */
-  /* eslint-disable no-await-in-loop */
-  for (const test of enabledTests) {
-    const result = await run(test)
-    res.locals.testResults.push(result)
+  try {
+    // https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
+    /* eslint-disable no-restricted-syntax */
+    /* eslint-disable no-await-in-loop */
+    for (const test of enabledTests) {
+      const result = await run(test)
+      res.locals.testResults.push(result)
+    }
+    next()
+  } catch (error) {
+    next(error)
   }
-
-  next()
 }
 
 module.exports = runTests
