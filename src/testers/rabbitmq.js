@@ -1,56 +1,72 @@
 const uuid = require('uuid/v1')
-const rabbit = require('amqplib/callback_api')
-const util = require('../util/helpers')
+const dbConnect = require('../db/rabbitmq')
+const { init, getCreds } = require('../util/helpers')
 
-const testRabbit = (req, res, next) => {
-  const svc = req.app.locals.conf.rabbitInstance
-  const cfg = init(req, res, svc)
-  const q = randName()
-
-  // may be called before conn or ch are defined
-  const cleanup = () => {
-    const finish = () => {
-      try {
-        conn.close()
-        return next()
-      } catch (err) {
-        return next()
-      }
-    }
+// promisfy message publishing
+const publishMessage = ({ channel, exchange, key, data }) => {
+  return new Promise((resolve, reject) => {
     try {
-      ch.deleteQueue(q, {}, (err, ok) => {
-        finish()
-      })
-    } catch (err) {
-      finish()
-    }
-  }
-
-  rabbit.connect(cfg.creds.uri, { noDelay: true }, (err, conn) => {
-    if (err) {
-      handleErr(err, cfg, cleanup)
-    } else {
-      conn.createChannel((err, ch) => {
-        if (err) {
-          handleErr(err, cfg, cleanup)
-        } else {
-          ch.assertQueue(q, { exclusive: true, autoDelete: true }, (err, ok) => {
-            if (err) {
-              handleErr(err, cfg, cleanup)
-            } else {
-              ch.sendToQueue(q, Buffer.from(cfg.time.toString()))
-              ch.consume(q, msg => {
-                cfg.results.seconds_elapsed = (Date.now() - Number(msg.content.toString())) / 1000
-                req.app.locals.testResults[svc] = cfg.results
-                ch.ackAll()
-                cleanup()
-              })
-            }
-          })
-        }
-      })
+      channel.publish(exchange, key, Buffer.from(data.toString()))
+      resolve()
+    } catch (error) {
+      reject(error)
     }
   })
+}
+
+// promisfy message consumption
+const consumeMessage = ({ connection, channel, queue }) => {
+  return new Promise((resolve, reject) => {
+    channel.consume(queue, async message => {
+      if (message) {
+        const time = Number(message.content.toString())
+        await channel.ack(message)
+        resolve(time)
+      }
+    })
+
+    // handle connection closed
+    connection.on('close', error => {
+      return reject(error)
+    })
+
+    // handle errors
+    connection.on('error', error => {
+      return reject(error)
+    })
+  })
+}
+
+const testRabbit = async instance => {
+  const testState = init(instance)
+  const exchange = uuid().slice(0, 8)
+  const queue = uuid().slice(-8)
+  const key = 'test'
+  const { connection, channel } = await dbConnect(getCreds(instance))
+
+  try {
+    await channel.assertExchange(exchange, 'direct', { autoDelete: true })
+    await channel.assertQueue(queue, { exclusive: true, autoDelete: true })
+    await channel.bindQueue(queue, exchange, key)
+    await publishMessage({ channel, exchange, key, data: testState.time })
+    const time = await consumeMessage({ connection, channel, queue })
+    if (time) {
+      testState.results.secondsElapsed = (Date.now() - time) / 1000
+    }
+  } catch (error) {
+    console.log(`ERROR - ${error.stack}`)
+    testState.results.message = error.message
+  } finally {
+    if (channel) {
+      await channel.unbindQueue(queue, exchange, key)
+      await channel.deleteQueue(queue)
+      await channel.deleteExchange(exchange)
+      await channel.close()
+    }
+    if (connection) await connection.close()
+  }
+
+  return testState.results
 }
 
 module.exports = testRabbit
