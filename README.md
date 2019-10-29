@@ -1,6 +1,6 @@
 ![Picture of Master Splinter](https://gitlab.com/deadlysyn/splinter/raw/ad90ab6ff95e50840ccd20916d97da4417e0a9c0/assets/splinter.jpg)
 
-# Splinter: Cloud Foundry Service Tester
+# Splinter: Cloud Foundry Service Instance Tester
 
 Inspired by prior art:
 
@@ -32,78 +32,86 @@ For each service enabled in the configuration (see `sample-config.yml`):
 - Report success/fail and timing in JSON
 - Respond with appropriate HTTP code
 
-Service binding has seen limited testing on [Pivotal Web Services](https://run.pivotal.io).
-Full CRUD examples for each service type are included, but tuning may be required.
-Feel free to submit pull requests, or just use this as a starting point!
+Service binding has been thoroughly tested on [Pivotal Web Services](https://run.pivotal.io).
+Aside from acting as a service instance test harness, you can
+[browse the testers directory](https://gitlab.com/deadlysyn/splinter/tree/master/src/testers)
+for full CRUD examples of included service types. This provides decent
+starter patterns for interacting with common service instances from Node.
+If you find bugs, think of useful tweaks or just know a better way, feel free to
+submit pull requests!
 
 ## Errors and Example Output
 
-Splinter returns `200 OK` on success and non-200 (mostly `500`) on error. On
-failure, `seconds_elapsed` will also be set to `-255` and `message` will
-capture the service error.
+Splinter returns `200 OK` on success and `502 Bad Gateway` on error. On
+failure, `secondsElapsed` will not be set and `message` will capture the
+service error.
 
 ```
+❯ http splinter.cfapps.io
 HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 257
 Content-Type: application/json; charset=utf-8
+Date: Tue, 29 Oct 2019 03:10:50 GMT
+Etag: W/"101-230EI7yOerxmRVcdFMAl8XmzzV8"
+X-Powered-By: Express
+X-Vcap-Request-Id: 9f5ba2e0-ae78-4388-45b9-b0c74443ca1b
 
-...
-
-{
-    "results": {
-        "my-mongodb": {
-            "message": "success",
-            "seconds_elapsed": 0.526
-        },
-        "my-mysql": {
-            "message": "success",
-            "seconds_elapsed": 0.287
-        },
-        "my-postgres": {
-            "message": "success",
-            "seconds_elapsed": 0.208
-        },
-        "my-rabbitmq": {
-            "message": "success",
-            "seconds_elapsed": 0.341
-        },
-        "my-redis": {
-            "message": "success",
-            "seconds_elapsed": 0.029
-        }
+[
+    {
+        "instance": "my-mongodb",
+        "message": "OK",
+        "secondsElapsed": 0.122
     },
-    "timestamp": "2018-07-11T03:53:43.720Z"
-}
+    {
+        "instance": "my-mysql",
+        "message": "OK",
+        "secondsElapsed": 0.046
+    },
+    {
+        "instance": "my-postgres",
+        "message": "OK",
+        "secondsElapsed": 0.036
+    },
+    {
+        "instance": "my-rabbitmq",
+        "message": "OK",
+        "secondsElapsed": 0.037
+    },
+    {
+        "instance": "my-redis",
+        "message": "OK",
+        "secondsElapsed": 0.042
+    }
+]
+
 ```
 
 ```
-HTTP/1.1 500 Internal Server Error
-Content-Type: application/json; charset=utf-8
-
+HTTP/1.1 502 Bad Gateway
 ...
 
 {
     "results": {
         "my-rabbitmq": {
             "message": "Error: Operation failed: QueueDeclare; 405 (RESOURCE-LOCKED) with message \"RESOURCE_LOCKED - cannot obtain exclusive access to locked queue 'splinter' in vhost 'tzxcpwaz'\"",
-            "seconds_elapsed": -255
         }
     },
-    "timestamp": "2018-07-18T01:57:07.549Z"
 }
 ```
 
 # Setup
 
 1. Clone this repo
-1. Copy `sample-config.json` to `<your-config-name>.json`
-1. Edit `<your-config-name>.json`
-    1. Enable services to test (set to `true`)
-    1. Configure enabled service instance names (used to lookup credentials)
+1. Copy `sample-config.yml` to `<your-config-name>.yml`
+1. Edit `<your-config-name>.yml`
+    1. Enable services to test (set to `enabled: true`)
+    1. Configure enabled service `instance:` names (used to discover credentials)
 1. Copy `manifest.yml` to `<your-manifest-name>.yml`
 1. Edit `<your-manifest-name>.yml`
-    1. Adjust `buildpack` and `routes` as needed
-    1. Update `services` to match your environment
-    1. Update `CONF` to point to `<your-conig-name>.json`
+    1. Adjust `routes:` as needed
+    1. Update `services:` to match your environment
+    1. Update `CONFIG` to point to `<your-conig-name>.yml`
 1. `cf push`
 
 Running every minute or less frequently is usually fine, but running too often
@@ -113,17 +121,18 @@ hit connection or other resource limits.
 
 The idea is to integrate this with your monitoring solution. You can monitor
 the HTTP status code (if any tested service fails, you'll get a non-200 response),
-graph `seconds_elapsed` (spot anomalies over time), etc. This could be done via
-direct polling (if you expose the endpoint) or via an internal process (even
-a concourse pipeline) which periodically polls the endpoint internally,
-formats as needed, then submits upstream to New Relic or similar.
+graph `secondsElapsed` (spot anomalies over time), etc. This could be done via
+direct polling (if you expose the endpoint) or via an internal process (perhaps
+a [concourse](https://concourse-ci.org)
+pipeline) which periodically polls the endpoint,
+formats as needed, then submits upstream to Datadog or similar.
 
 # References
 
 - https://run.pivotal.io
 - https://www.npmjs.com/package/cfenv
-- https://www.npmjs.com/package/redis
 - https://www.npmjs.com/package/mongoose
-- https://www.npmjs.com/package/mysql
+- https://www.npmjs.com/package/mysql2
 - https://www.npmjs.com/package/pg
 - https://www.npmjs.com/package/amqplib
+- https://www.npmjs.com/package/redis
