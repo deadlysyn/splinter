@@ -6,10 +6,10 @@ applications:
     instances: 1
     services:
       - my-mongodb
-      # - my-mysql
-      # - my-postgres
-      # - my-rabbitmq
-      # - my-redis
+      - my-mysql
+      - my-postgres
+      - my-rabbitmq
+      - my-redis
     routes:
       - route: splinter.cfapps.io
     env:
