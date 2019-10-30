@@ -55,33 +55,35 @@ Etag: W/"101-230EI7yOerxmRVcdFMAl8XmzzV8"
 X-Powered-By: Express
 X-Vcap-Request-Id: 9f5ba2e0-ae78-4388-45b9-b0c74443ca1b
 
-[
-    {
-        "instance": "my-mongodb",
-        "message": "OK",
-        "secondsElapsed": 0.122
-    },
-    {
-        "instance": "my-mysql",
-        "message": "OK",
-        "secondsElapsed": 0.046
-    },
-    {
-        "instance": "my-postgres",
-        "message": "OK",
-        "secondsElapsed": 0.036
-    },
-    {
-        "instance": "my-rabbitmq",
-        "message": "OK",
-        "secondsElapsed": 0.037
-    },
-    {
-        "instance": "my-redis",
-        "message": "OK",
-        "secondsElapsed": 0.042
-    }
-]
+{
+    "results": [
+        {
+            "instance": "my-mongodb",
+            "message": "OK",
+            "secondsElapsed": 0.122
+        },
+        {
+            "instance": "my-mysql",
+            "message": "OK",
+            "secondsElapsed": 0.046
+        },
+        {
+            "instance": "my-postgres",
+            "message": "OK",
+            "secondsElapsed": 0.036
+        },
+        {
+            "instance": "my-rabbitmq",
+            "message": "OK",
+            "secondsElapsed": 0.037
+        },
+        {
+            "instance": "my-redis",
+            "message": "OK",
+            "secondsElapsed": 0.042
+        }
+    ]
+}
 ```
 
 ```bash
@@ -95,33 +97,16 @@ Etag: W/"171-D5Q3I7MJh3J+RLgPgeGMfKUqy/U"
 X-Powered-By: Express
 X-Vcap-Request-Id: 7594c180-2f4c-40eb-5eb8-0a7a1f24aa94
 
-[
-    {
-        "instance": "my-mongodb",
-        "message": "ERROR - test",
-        "secondsElapsed": 0.133
-    },
-    {
-        "instance": "my-mysql",
-        "message": "ERROR - test",
-        "secondsElapsed": 0.056
-    },
-    {
-        "instance": "my-postgres",
-        "message": "ERROR - test",
-        "secondsElapsed": 0.046
-    },
-    {
-        "instance": "my-rabbitmq",
-        "message": "ERROR - test",
-        "secondsElapsed": 0.047
-    },
-    {
-        "instance": "my-redis",
-        "message": "ERROR - test",
-        "secondsElapsed": 0.089
-    }
-]
+{
+    "results": [
+        {
+            "instance": "my-mongodb",
+            "message": "ERROR - test",
+            "secondsElapsed": 0.133
+        },
+    ...
+    ]
+}
 ```
 
 # Getting Started
