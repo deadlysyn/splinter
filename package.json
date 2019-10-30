@@ -22,8 +22,7 @@
     },
     "homepage": "https://gitlab.com/deadlysyn/splinter#readme",
     "engines": {
-        "node": "12.13.0",
-        "npm": "6.12.0"
+        "node": "12.13.0"
     },
     "dependencies": {
         "amqplib": "^0.5.5",
