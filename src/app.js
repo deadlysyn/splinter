@@ -8,7 +8,7 @@ app.get('/', runTests, (req, res) => {
   const errorsDetected = res.locals.testResults.some(test => test.message !== 'OK')
   let statusCode = 200
   if (errorsDetected) statusCode = 502
-  res.status(statusCode).send(res.locals.testResults)
+  res.status(statusCode).send({ results: res.locals.testResults })
 })
 
 app.all('*', (req, res) => {
