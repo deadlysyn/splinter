@@ -11,6 +11,19 @@ If you have no automated platform testing, [cf-smoke-tests](https://github.com/c
 
 Splinter is an attempt to meet that need by providing a simple application allowing platform teams to easily and selectively exercise shared services. `cf-smoke-tests` can continue providing confidence in Cloud Foundry components while Splinter integrates with external monitoring to provide confidence in shared services.
 
+## 2019 Refactor
+
+Splinter underwent a major refactor as part of moving to the latest Node.js LTS release (12.13 as of writing):
+
+- Bump all dependencies to latest stable versions
+- Greatly simplify route code
+- Eliminate callback hell and use async/await in all tests
+- Better separation of concerns (test harness middleware, connection logic)
+- Cleanup each test to serve as better patterns
+- Improve RabbitMQ test to be more real-world (leverage custom exchange and binding)
+- Move from JSON to YAML for configuration
+- WIP: Add Prometheus instrumentation
+
 # Overview
 
 For each service enabled in the configuration (see `sample-config.yml`):
@@ -25,7 +38,7 @@ For each service enabled in the configuration (see `sample-config.yml`):
 - Report success/fail and timing in JSON
 - Respond with appropriate HTTP code
 
-Service binding has been thoroughly tested on [Pivotal Web Services](https://run.pivotal.io). Aside from acting as a service instance test harness, you can [browse the testers directory](https://gitlab.com/deadlysyn/splinter/tree/master/src/testers) for full CRUD examples of included service types. This provides decent starter patterns for interacting with common service instances from Node. If you find bugs, think of useful tweaks or just know a better way, feel free to submit pull requests!
+Service binding has been thoroughly tested on [Pivotal Web Services](https://run.pivotal.io). Aside from acting as a service instance test harness, you can [browse src/testers](https://gitlab.com/deadlysyn/splinter/tree/master/src/testers) for full CRUD examples of included service types. This provides decent starter patterns for interacting with common service instances from Node. If you find bugs, think of useful tweaks or just know a better way, feel free to submit pull requests!
 
 ## Example Output
 
@@ -72,16 +85,43 @@ X-Vcap-Request-Id: 9f5ba2e0-ae78-4388-45b9-b0c74443ca1b
 ```
 
 ```bash
+❯ http splinter.cfapps.io
 HTTP/1.1 502 Bad Gateway
-...
+Connection: keep-alive
+Content-Length: 369
+Content-Type: application/json; charset=utf-8
+Date: Wed, 30 Oct 2019 02:09:35 GMT
+Etag: W/"171-D5Q3I7MJh3J+RLgPgeGMfKUqy/U"
+X-Powered-By: Express
+X-Vcap-Request-Id: 7594c180-2f4c-40eb-5eb8-0a7a1f24aa94
 
-{
-    "results": {
-        "my-rabbitmq": {
-            "message": "Error: Operation failed: QueueDeclare; 405 (RESOURCE-LOCKED) with message \"RESOURCE_LOCKED - cannot obtain exclusive access to locked queue 'splinter' in vhost 'tzxcpwaz'\"",
-        }
+[
+    {
+        "instance": "my-mongodb",
+        "message": "ERROR - test",
+        "secondsElapsed": 0.133
     },
-}
+    {
+        "instance": "my-mysql",
+        "message": "ERROR - test",
+        "secondsElapsed": 0.056
+    },
+    {
+        "instance": "my-postgres",
+        "message": "ERROR - test",
+        "secondsElapsed": 0.046
+    },
+    {
+        "instance": "my-rabbitmq",
+        "message": "ERROR - test",
+        "secondsElapsed": 0.047
+    },
+    {
+        "instance": "my-redis",
+        "message": "ERROR - test",
+        "secondsElapsed": 0.089
+    }
+]
 ```
 
 # Getting Started
