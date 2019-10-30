@@ -12,13 +12,13 @@ const testMongo = async instance => {
   try {
     const testDoc = new Test({
       name,
-      time: testState.time,
+      startTime: testState.startTime,
     })
     await testDoc.save()
 
     const test = await Test.findOne({ name })
     if (test) {
-      testState.results.secondsElapsed = (Date.now() - test.time) / 1000
+      testState.results.secondsElapsed = (Date.now() - test.startTime) / 1000
     }
   } catch (error) {
     console.log(`ERROR - ${error.message}`)
