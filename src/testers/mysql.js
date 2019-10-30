@@ -8,9 +8,9 @@ const testMysql = async instance => {
   const db = await dbConnect(getCreds(instance))
 
   // not fully preparing statements since data is trusted
-  const queryCreate = `CREATE TABLE IF NOT EXISTS \`${table}\` (startTime BIGINT)`
-  const queryInsert = `INSERT INTO \`${table}\` (startTime) VALUES (${testState.startTime})`
-  const querySelect = `SELECT startTime FROM \`${table}\` LIMIT 1`
+  const queryCreate = `CREATE TABLE IF NOT EXISTS \`${table}\` (start_time BIGINT)`
+  const queryInsert = `INSERT INTO \`${table}\` (start_time) VALUES (${testState.startTime})`
+  const querySelect = `SELECT start_time FROM \`${table}\` LIMIT 1`
   const queryDrop = `DROP TABLE \`${table}\``
 
   try {
@@ -18,7 +18,7 @@ const testMysql = async instance => {
     await db.query(queryInsert)
     const [rows, fields] = await db.query(querySelect)
     if (rows) {
-      testState.results.secondsElapsed = (Date.now() - rows[0].startTime) / 1000
+      testState.results.secondsElapsed = (Date.now() - rows[0].start_time) / 1000
     }
   } catch (error) {
     console.log(`ERROR - ${error.message}`)
