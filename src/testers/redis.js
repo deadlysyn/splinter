@@ -5,7 +5,7 @@ const { init, getCreds } = require('../util/helpers')
 const testRedis = async instance => {
   const testState = init(instance)
   const key = uuid()
-  const client = dbConnect(getCreds(instance))
+  const client = await dbConnect(getCreds(instance))
 
   try {
     client.on('error', error => {
