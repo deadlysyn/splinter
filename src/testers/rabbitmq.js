@@ -20,9 +20,9 @@ const consumeMessage = ({ connection, channel, queue }) => {
     channel.consume(queue, async message => {
       // https://github.com/squaremo/amqp.node/issues/176
       if (message) {
-        const time = Number(message.content.toString())
+        const startTime = Number(message.content.toString())
         await channel.ack(message)
-        resolve(time)
+        resolve(startTime)
       }
     })
 
@@ -49,10 +49,10 @@ const testRabbit = async instance => {
     await channel.assertExchange(exchange, 'direct', { autoDelete: true })
     await channel.assertQueue(queue, { exclusive: true, autoDelete: true })
     await channel.bindQueue(queue, exchange, key)
-    await publishMessage({ channel, exchange, key, data: testState.time })
-    const time = await consumeMessage({ connection, channel, queue })
-    if (time) {
-      testState.results.secondsElapsed = (Date.now() - time) / 1000
+    await publishMessage({ channel, exchange, key, data: testState.startTime })
+    const startTime = await consumeMessage({ connection, channel, queue })
+    if (startTime) {
+      testState.results.secondsElapsed = (Date.now() - startTime) / 1000
     }
   } catch (error) {
     console.log(`ERROR - ${error.stack}`)

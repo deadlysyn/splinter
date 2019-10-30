@@ -12,9 +12,9 @@ const testRedis = async instance => {
       throw error
     })
 
-    await client.set(key, testState.time, 'EX', 10) // expire after 10 seconds
-    const time = await client.get(key)
-    testState.results.secondsElapsed = (Date.now() - time) / 1000
+    await client.set(key, testState.startTime, 'EX', 10) // expire after 10 seconds
+    const startTime = await client.get(key)
+    testState.results.secondsElapsed = (Date.now() - startTime) / 1000
   } catch (error) {
     console.log(`ERROR - ${error.stack}`)
     testState.results.message = error.message

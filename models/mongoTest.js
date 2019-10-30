@@ -5,7 +5,7 @@ const testSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  time: {
+  startTime: {
     type: Number,
     required: true,
     default: 0,

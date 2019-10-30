@@ -13,7 +13,7 @@ const getCreds = instance => {
 // instantite object to hold test state
 const init = instance => {
   return {
-    time: Date.now(),
+    startTime: Date.now(),
     results: {
       instance,
       message: 'OK',
