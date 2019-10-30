@@ -1,6 +1,6 @@
 ![Picture of Master Splinter](https://gitlab.com/deadlysyn/splinter/raw/ad90ab6ff95e50840ccd20916d97da4417e0a9c0/assets/splinter.jpg)
 
-# Splinter: Cloud Foundry Service Instance Tester
+# Splinter: Cloud Foundry Service Instance Smoke Tester
 
 Inspired by prior art:
 
@@ -16,7 +16,7 @@ Splinter is an attempt to meet that need by providing a simple application allow
 Splinter underwent a major refactor as part of moving to the latest Node.js LTS release (12.13 as of writing):
 
 - Bump all dependencies to latest stable versions
-- Greatly simplify route code
+- Greatly simplify server and routing code
 - Eliminate callback hell and use async/await in all tests
 - Better separation of concerns (test harness middleware, connection logic)
 - Cleanup each test to serve as better patterns
