@@ -140,6 +140,7 @@ Ideally you integrate this with your monitoring solution. You can monitor the HT
 - https://www.npmjs.com/package/pg
 - https://www.npmjs.com/package/amqplib
 - https://www.npmjs.com/package/redis
+- https://www.npmjs.com/package/async-redis
 - http://www.squaremobius.net/amqp.node
 - https://www.manifold.co/blog/asynchronous-microservices-with-rabbitmq-and-node-js
 - https://prometheus.io/docs/introduction/overview
