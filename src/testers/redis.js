@@ -1,34 +1,27 @@
 const uuid = require('uuid/v1')
-const redis = require('redis')
-const util = require('../util/helpers')
+const dbConnect = require('../db/redis')
+const { init, getCreds } = require('../util/helpers')
 
-const testRedis = (req, res, next) => {
-  const svc = req.app.locals.conf.redisInstance
-  const cfg = init(req, res, svc)
-  const q = randName()
+const testRedis = async instance => {
+  const testState = init(instance)
+  const key = uuid()
+  const client = dbConnect(getCreds(instance))
 
-  const client = redis.createClient({
-    host: cfg.creds.hostname,
-    port: cfg.creds.port,
-    password: cfg.creds.password,
-  })
+  try {
+    client.on('error', error => {
+      throw error
+    })
 
-  const cleanup = () => {
+    await client.set(key, testState.time, 'EX', 10) // expire after 10 seconds
+    const time = await client.get(key)
+    testState.results.secondsElapsed = (Date.now() - time) / 1000
+  } catch (error) {
+    console.log(`ERROR - ${error.stack}`)
+    testState.results.message = error.message
+  } finally {
     client.quit()
-    return next()
   }
-
-  client.on('error', err => handleErr(err, cfg, cleanup))
-  client.set(q, cfg.time, 'EX', 30) // expire after 30 seconds
-  client.get(q, (err, timestamp) => {
-    if (err) {
-      handleErr(err, cfg, cleanup)
-    } else {
-      cfg.results.seconds_elapsed = (Date.now() - timestamp) / 1000
-      req.app.locals.testResults[svc] = cfg.results
-      cleanup()
-    }
-  })
+  return testState.results
 }
 
 module.exports = testRedis
