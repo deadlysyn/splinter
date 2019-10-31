@@ -11,7 +11,7 @@ const getCreds = instance => {
 }
 
 // DRY up common error handling tasks
-const handleError = ({ testState, error }) => {
+const handleError = ({ testState, error, errors }) => {
   try {
     console.log(error.stack)
     /* eslint-disable no-param-reassign */
@@ -19,6 +19,7 @@ const handleError = ({ testState, error }) => {
   } catch (error) {
     testState.results.message = 'Caught unknown error.'
   }
+  errors.inc()
   return testState.results
 }
 
