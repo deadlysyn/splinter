@@ -4,9 +4,10 @@ const dbConnect = async credentials => {
   try {
     const db = new pg.Client({ connectionString: credentials.uri })
     await db.connect()
-    return db
+    return { error: null, db }
   } catch (error) {
-    console.log(`ERROR - ${error.message}`)
+    // bubble up errors for handling
+    return { error, db: null }
   }
 }
 

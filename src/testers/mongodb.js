@@ -1,13 +1,14 @@
 const uuid = require('uuid/v1')
-const { mongoose, dbConnect } = require('../db/mongoose')
+const dbConnect = require('../db/mongodb')
 const Test = require('../../models/mongoTest')
-const { init, getCreds } = require('../util/helpers')
+const { init, handleError, getCreds } = require('../util/helpers')
 
 const testMongo = async instance => {
   const testState = init(instance)
   const name = uuid()
 
-  await dbConnect(getCreds(instance))
+  const { error, db } = await dbConnect(getCreds(instance))
+  if (error) return handleError({ testState, error })
 
   try {
     const testDoc = new Test({
@@ -17,15 +18,13 @@ const testMongo = async instance => {
     await testDoc.save()
 
     const test = await Test.findOne({ name })
-    if (test) {
-      testState.results.secondsElapsed = (Date.now() - test.startTime) / 1000
-    }
+    if (!test) throw new Error('Unable to retrieve document.')
+    testState.results.secondsElapsed = (Date.now() - test.startTime) / 1000
   } catch (error) {
-    console.log(`ERROR - ${error.message}`)
-    testState.results.message = error.message
+    handleError({ testState, error })
   } finally {
     await Test.deleteMany({})
-    await mongoose.connection.close()
+    await db.connection.close()
   }
 
   return testState.results

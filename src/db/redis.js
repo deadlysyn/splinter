@@ -1,17 +1,17 @@
 // const redis = require('redis')
-const asyncRedis = require('async-redis')
+const Redis = require('ioredis')
 
 const dbConnect = credentials => {
-  try {
-    const client = asyncRedis.createClient({
-      host: credentials.hostname,
-      port: credentials.port,
-      password: credentials.password,
-    })
-    return client
-  } catch (error) {
-    console.log(`ERROR - ${error.stack}`)
-  }
+  // fail fast
+  const client = new Redis({
+    host: credentials.hostname,
+    port: credentials.port,
+    password: credentials.password,
+    autoResubscribe: false,
+    maxRetriesPerRequest: 1,
+    reconnectOnError: false,
+  })
+  return client
 }
 
 module.exports = dbConnect

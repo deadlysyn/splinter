@@ -1,26 +1,28 @@
 const uuid = require('uuid/v1')
 const dbConnect = require('../db/redis')
-const { init, getCreds } = require('../util/helpers')
+const { init, handleError, getCreds } = require('../util/helpers')
 
 const testRedis = async instance => {
   const testState = init(instance)
   const key = uuid()
+
   const client = await dbConnect(getCreds(instance))
+  client.on('error', async error => {
+    await handleError({ testState, error })
+  })
 
   try {
-    client.on('error', error => {
-      throw error
-    })
-
-    await client.set(key, testState.startTime, 'EX', 10) // expire after 10 seconds
+    // auto-expire after 10 seconds
+    await client.set(key, testState.startTime, 'EX', 10)
     const startTime = await client.get(key)
+    if (!startTime) throw new Error('Unable to read key/value')
     testState.results.secondsElapsed = (Date.now() - startTime) / 1000
   } catch (error) {
-    console.log(`ERROR - ${error.stack}`)
-    testState.results.message = error.message
+    handleError({ testState, error })
   } finally {
     client.quit()
   }
+
   return testState.results
 }
 

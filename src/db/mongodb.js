@@ -9,12 +9,10 @@ const dbConnect = async credentials => {
       useFindAndModify: false,
       useUnifiedTopology: true,
     })
+    return { error: null, db: mongoose }
   } catch (error) {
-    console.log(error.message)
+    return { error, db: null }
   }
 }
 
-module.exports = {
-  mongoose,
-  dbConnect,
-}
+module.exports = dbConnect
