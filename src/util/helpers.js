@@ -10,6 +10,18 @@ const getCreds = instance => {
   return appEnv.getServiceCreds(instance)
 }
 
+// DRY up common error handling tasks
+const handleError = ({ testState, error }) => {
+  try {
+    console.log(error.stack)
+    /* eslint-disable no-param-reassign */
+    if (testState.results.message === 'OK') testState.results.message = error.message
+  } catch (error) {
+    testState.results.message = 'Caught unknown error.'
+  }
+  return testState.results
+}
+
 // instantite object to hold test state
 const init = instance => {
   return {
@@ -23,5 +35,6 @@ const init = instance => {
 
 module.exports = {
   getCreds,
+  handleError,
   init,
 }

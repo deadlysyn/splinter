@@ -4,9 +4,10 @@ const dbConnect = async credentials => {
   try {
     const connection = await rabbitmq.connect(credentials.uri, { noDelay: true })
     const channel = await connection.createChannel()
-    return { connection, channel }
+    return { error: null, connection, channel }
   } catch (error) {
-    console.log(`ERROR - ${error.stack}`)
+    // bubble up errors for handling
+    return { error, connection: null, channel: null }
   }
 }
 
