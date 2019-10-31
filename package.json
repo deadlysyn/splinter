@@ -26,15 +26,14 @@
     },
     "dependencies": {
         "amqplib": "^0.5.5",
-        "async-redis": "^1.1.7",
         "cfenv": "^1.2.2",
         "express": "^4.17.1",
         "fs": "0.0.1-security",
+        "ioredis": "^4.14.1",
         "js-yaml": "^3.13.1",
         "mongoose": "^5.7.7",
         "mysql2": "^1.7.0",
         "pg": "^7.12.1",
-        "redis": "^2.8.0",
         "uuid": "^3.3.3"
     },
     "devDependencies": {
