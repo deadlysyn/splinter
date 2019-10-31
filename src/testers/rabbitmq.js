@@ -1,6 +1,7 @@
 const uuid = require('uuid/v1')
 const dbConnect = require('../db/rabbitmq')
 const { init, handleError, getCreds } = require('../util/helpers')
+const { requests, errors, latency } = require('../metrics/mongodb')
 
 // promisfy message publishing
 const publishMessage = ({ channel, exchange, key, data }) => {
@@ -45,7 +46,7 @@ const testRabbit = async instance => {
   const key = 'test'
 
   const { error, connection, channel } = await dbConnect(getCreds(instance))
-  if (error) return handleError({ testState, error })
+  if (error) return handleError({ testState, error, errors })
 
   try {
     await channel.assertExchange(exchange, 'direct', { autoDelete: true })
@@ -55,8 +56,10 @@ const testRabbit = async instance => {
     const startTime = await consumeMessage({ connection, channel, queue })
     if (!startTime) throw new Error('Unable to consume message from queue.')
     testState.results.secondsElapsed = (Date.now() - startTime) / 1000
+    requests.inc()
+    latency.observe(testState.results.secondsElapsed)
   } catch (error) {
-    handleError({ testState, error })
+    handleError({ testState, error, errors })
   } finally {
     if (channel) {
       await channel.unbindQueue(queue, exchange, key)
