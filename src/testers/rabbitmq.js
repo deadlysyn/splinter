@@ -56,7 +56,7 @@ const testRabbit = async instance => {
     if (!startTime) throw new Error('Unable to consume message from queue.')
     testState.results.secondsElapsed = (Date.now() - startTime) / 1000
   } catch (error) {
-    return handleError({ testState, error })
+    handleError({ testState, error })
   } finally {
     if (channel) {
       await channel.unbindQueue(queue, exchange, key)
