@@ -16,11 +16,14 @@ Splinter is an attempt to meet that need by providing a simple application allow
 Splinter underwent a major refactor as part of moving to the latest Node.js LTS release (12.13 as of writing):
 
 - Bump all dependencies to latest stable versions
+- Move to mysql2 (generally more performant)
+- Move to ioredis vs redis+async-redis (fewer dependencies, better maintained, more resilient)
 - Greatly simplify server and routing code
 - Eliminate callback hell and use async/await in all tests
 - Better separation of concerns (test harness middleware, connection logic)
 - Cleanup each test to serve as better patterns
 - Improve RabbitMQ test to be more real-world (leverage custom exchange and binding)
+- More robust error handling and reporting (catch more edge cases)
 - Move from JSON to YAML for configuration
 - WIP: Add Prometheus instrumentation
 
