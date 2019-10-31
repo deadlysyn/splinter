@@ -1,7 +1,7 @@
 const uuid = require('uuid/v1')
 const dbConnect = require('../db/postgresql')
 const { init, handleError, getCreds } = require('../util/helpers')
-const { requests, errors, latency } = require('../metrics/mongodb')
+const { requests, errors, latency } = require('../metrics/postgresql')
 
 const testPostgres = async instance => {
   const testState = init(instance)

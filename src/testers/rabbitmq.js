@@ -1,7 +1,7 @@
 const uuid = require('uuid/v1')
 const dbConnect = require('../db/rabbitmq')
 const { init, handleError, getCreds } = require('../util/helpers')
-const { requests, errors, latency } = require('../metrics/mongodb')
+const { requests, errors, latency } = require('../metrics/rabbitmq')
 
 // promisfy message publishing
 const publishMessage = ({ channel, exchange, key, data }) => {
