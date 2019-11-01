@@ -155,7 +155,7 @@ Example PromQL queries you might find useful:
 
 An example Grafana dashboard is also included in [prometheus/grafana_dashboard.json](https://gitlab.com/deadlysyn/splinter/tree/master/prometheus/grafana_dashboard.json).
 
-![Sample Grafana Dashboard](https://gitlab.com/deadlysyn/splinter/raw/ad90ab6ff95e50840ccd20916d97da4417e0a9c0/assets/grafana.jpg)
+![Sample Grafana Dashboard](https://gitlab.com/deadlysyn/splinter/raw/master/assets/grafana.jpg)
 
 # References
 
