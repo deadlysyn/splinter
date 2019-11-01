@@ -1,4 +1,4 @@
-![Master Splinter](https://gitlab.com/deadlysyn/splinter/raw/ad90ab6ff95e50840ccd20916d97da4417e0a9c0/assets/splinter.jpg)
+![Master Splinter](https://gitlab.com/deadlysyn/splinter/raw/master/assets/splinter.jpg)
 
 # Splinter: Cloud Foundry Service Instance Smoke Tester
 
