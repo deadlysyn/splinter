@@ -1,4 +1,4 @@
-![Picture of Master Splinter](https://gitlab.com/deadlysyn/splinter/raw/ad90ab6ff95e50840ccd20916d97da4417e0a9c0/assets/splinter.jpg)
+![Master Splinter](https://gitlab.com/deadlysyn/splinter/raw/ad90ab6ff95e50840ccd20916d97da4417e0a9c0/assets/splinter.jpg)
 
 # Splinter: Cloud Foundry Service Instance Smoke Tester
 
@@ -25,7 +25,7 @@ Splinter underwent a major refactor as part of moving to the latest Node.js LTS 
 - Improve RabbitMQ test to be more real-world (leverage custom exchange and binding)
 - More robust error handling and reporting (catch more edge cases)
 - Move from JSON to YAML for configuration
-- WIP: Add Prometheus instrumentation
+- Added Prometheus instrumentation
 
 # Overview
 
@@ -134,6 +134,29 @@ Running every minute or less is fine, but running too often may result in spurio
 
 Ideally you integrate this with your monitoring solution. You can monitor the HTTP status code (if any tested service fails, you'll get a non-200 response), graph `secondsElapsed` (spot anomalies over time), etc. This could be done via direct polling (if you expose the endpoint) or via an internal process (perhaps a [Concourse](https://concourse-ci.org) pipeline) which periodically polls the endpoint, formats as needed, then submits upstream to Datadog or similar.
 
+# Prometheus Support
+
+The original workflow simply relied on scraping the root path and parsing JSON metrics (and HTTP response codes) to integrate with external monitoring. The 2019 refactor added Prometheus instrumentation. Each test exposes `*_tests_total` and `*_errors_total` counters as well as `*_latency_seconds` histograms via the `/metrics` endpoint which can be scraped with something like:
+
+```yaml
+global:
+  scrape_interval: 10s
+scrape_configs:
+  - job_name: splinter
+    static_configs:
+      - targets:
+          - splinter.cfapps.io:80
+```
+
+Example PromQL queries you might find useful:
+
+- Error rate: `rate(splinter_mongodb_errors_total[5m]) / rate(splinter_mongodb_tests_total[5m])`
+- 95th percentile latency: `histogram_quantile(0.95, rate(splinter_mongodb_latency_seconds_bucket[5m]))`
+
+An example Grafana dashboard is also included in [prometheus/grafana_dashboard.json](https://gitlab.com/deadlysyn/splinter/tree/master/prometheus/grafana_dashboard.json).
+
+![Sample Grafana Dashboard](https://gitlab.com/deadlysyn/splinter/raw/ad90ab6ff95e50840ccd20916d97da4417e0a9c0/assets/grafana.jpg)
+
 # References
 
 - https://run.pivotal.io
@@ -148,3 +171,4 @@ Ideally you integrate this with your monitoring solution. You can monitor the HT
 - https://www.manifold.co/blog/asynchronous-microservices-with-rabbitmq-and-node-js
 - https://prometheus.io/docs/introduction/overview
 - https://github.com/siimon/prom-client
+- https://grafana.com/docs
