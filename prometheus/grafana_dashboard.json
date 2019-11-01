@@ -90,17 +90,18 @@
       "options": {
         "dataLinks": []
       },
-      "percentage": false,
+      "percentage": true,
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": false,
+      "stack": true,
       "steppedLine": false,
       "targets": [
         {
           "expr": "rate(splinter_mongodb_errors_total[5m]) / rate(splinter_mongodb_tests_total[5m])",
+          "instant": false,
           "legendFormat": "MongoDB",
           "refId": "A"
         },
@@ -283,7 +284,7 @@
     "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
@@ -303,5 +304,5 @@
   "timezone": "utc",
   "title": "Splinter Dashboard",
   "uid": "uycqZYAZz",
-  "version": 4
+  "version": 6
 }
