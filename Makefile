@@ -1,10 +1,10 @@
 DOCKER=/usr/local/bin/docker
-IMG=splinter
+IMAGE=splinter
 
 build:
-	$(DOCKER) build . -t $(IMG)
+	$(DOCKER) build . -t $(IMAGE):latest
 
 run:
-	$(DOCKER) run --rm -v $(PWD):/app -p 3000:3000 \
+	$(DOCKER) run --rm -v $(PWD):/app -p ${PORT}:${PORT} \
 		-e IP="0.0.0.0" \
-		-e CONF="${CONF}" $(IMG)
+		-e CONFIG="${CONFIG}" $(IMAGE)
