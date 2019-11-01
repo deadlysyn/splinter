@@ -165,8 +165,7 @@ An example Grafana dashboard is also included in [prometheus/grafana_dashboard.j
 - https://www.npmjs.com/package/mysql2
 - https://www.npmjs.com/package/pg
 - https://www.npmjs.com/package/amqplib
-- https://www.npmjs.com/package/redis
-- https://www.npmjs.com/package/async-redis
+- https://www.npmjs.com/package/ioredis
 - http://www.squaremobius.net/amqp.node
 - https://www.manifold.co/blog/asynchronous-microservices-with-rabbitmq-and-node-js
 - https://prometheus.io/docs/introduction/overview
