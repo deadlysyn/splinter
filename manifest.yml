@@ -1,7 +1,7 @@
 ---
 applications:
   - name: splinter
-    command: node app.js
+    command: node src/server.js
     memory: 256M
     instances: 1
     services:
@@ -13,8 +13,7 @@ applications:
     routes:
       - route: splinter.cfapps.io
     env:
-      CONF: sample-config.json
+      CONFIG: sampleConfig.yml
       NODE_MODULES_CACHE: false
       NODE_VERBOSE: true
-      # NPM_CONFIG_LOGLEVEL: silly
       OPTIMIZE_MEMORY: true

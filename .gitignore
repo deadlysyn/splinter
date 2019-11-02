@@ -58,6 +58,9 @@ typings/
 
 # dotenv environment variables file
 .env
+.envrc
 
 # next.js build output
 .next
+
+prometheus/data

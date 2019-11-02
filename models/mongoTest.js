@@ -1,8 +1,17 @@
 const mongoose = require('mongoose')
 
 const testSchema = new mongoose.Schema({
-    name: String,
-    timestamp: { type: Number, default: 0 }
+  name: {
+    type: String,
+    required: true,
+  },
+  startTime: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
 })
 
-module.exports = mongoose.model('Test', testSchema)
+const Test = mongoose.model('Test', testSchema)
+
+module.exports = Test
