@@ -130,7 +130,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Test Error Rate",
+      "title": "Service Instance Combined Error Rate",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -238,7 +238,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Test Latency (95th Percentile)",
+      "title": "Service Instance Latency (95th Percentile)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -277,6 +277,7 @@
       }
     }
   ],
+  "refresh": "1m",
   "schemaVersion": 20,
   "style": "dark",
   "tags": [],
@@ -284,7 +285,7 @@
     "list": []
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {
@@ -304,5 +305,5 @@
   "timezone": "utc",
   "title": "Splinter Dashboard",
   "uid": "uycqZYAZz",
-  "version": 6
+  "version": 7
 }
