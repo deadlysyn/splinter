@@ -1,13 +1,18 @@
 DOCKER=/usr/local/bin/docker
+<<<<<<< HEAD
 IMG=splinter
 SKEL=/Users/mhoskins/src/dotfiles
+=======
+IMAGE=splinter
+>>>>>>> b5d4d52... get port and config from envrc
 
 build:
-	$(DOCKER) build . -t $(IMG)
+	$(DOCKER) build . -t $(IMAGE):latest
 
 run:
-	$(DOCKER) run --rm -v $(PWD):/app -p 3000:3000 \
+	$(DOCKER) run --rm -v $(PWD):/app -p ${PORT}:${PORT} \
 		-e IP="0.0.0.0" \
+<<<<<<< HEAD
 		-e CONF="${CONF}" $(IMG)
 
 prettier:
@@ -17,3 +22,6 @@ prettier:
 	cp $(SKEL)/.prettier* .
 	cp $(SKEL)/.eslint* .
 	cp $(SKEL)/.cfignore .
+=======
+		-e CONFIG="${CONFIG}" $(IMAGE)
+>>>>>>> b5d4d52... get port and config from envrc
