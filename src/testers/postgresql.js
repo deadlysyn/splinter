@@ -17,12 +17,13 @@ const testPostgres = async instance => {
   const queryDrop = `DROP TABLE "${table}"`
 
   try {
+    // Increase requests first in case our test throw an error and we skip request.inc() and error/total ratio calc will be incrorrect
+    requests.inc()
     await db.query(queryCreate)
     await db.query(queryInsert, [testState.startTime])
     const result = await db.query(querySelect)
     if (result.rows.length === 0) throw new Error('No rows retrieved from database.')
     testState.results.secondsElapsed = (Date.now() - result.rows[0].start_time) / 1000
-    requests.inc()
     latency.observe(testState.results.secondsElapsed)
   } catch (error) {
     handleError({ testState, error, errors })
