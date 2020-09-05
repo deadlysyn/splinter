@@ -13,6 +13,8 @@ const testRedis = async instance => {
   })
 
   try {
+    // Increase requests first in case our test throw an error and we skip request.inc() and error/total ratio calc will be incrorrect
+    requests.inc()
     // auto-expire after 10 seconds
     await client.set(key, testState.startTime, 'EX', 10)
     const startTime = await client.get(key)

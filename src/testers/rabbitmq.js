@@ -49,6 +49,8 @@ const testRabbit = async instance => {
   if (error) return handleError({ testState, error, errors })
 
   try {
+    // Increase requests first in case our test throw an error and we skip request.inc() and error/total ratio calc will be incrorrect
+    requests.inc()
     await channel.assertExchange(exchange, 'direct', { autoDelete: true })
     await channel.assertQueue(queue, { exclusive: true, autoDelete: true })
     await channel.bindQueue(queue, exchange, key)
@@ -56,7 +58,6 @@ const testRabbit = async instance => {
     const startTime = await consumeMessage({ connection, channel, queue })
     if (!startTime) throw new Error('Unable to consume message from queue.')
     testState.results.secondsElapsed = (Date.now() - startTime) / 1000
-    requests.inc()
     latency.observe(testState.results.secondsElapsed)
   } catch (error) {
     handleError({ testState, error, errors })

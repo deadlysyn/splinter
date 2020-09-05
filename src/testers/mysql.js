@@ -17,12 +17,13 @@ const testMysql = async instance => {
   const queryDrop = `DROP TABLE \`${table}\``
 
   try {
+    // Increase requests first in case our test throw an error and we skip request.inc() and error/total ratio calc will be incrorrect
+    requests.inc()
     await db.query(queryCreate)
     await db.query(queryInsert)
     const [rows, fields] = await db.query(querySelect)
     if (rows.length === 0) throw new Error('No rows retrieved from database.')
     testState.results.secondsElapsed = (Date.now() - rows[0].start_time) / 1000
-    requests.inc()
     latency.observe(testState.results.secondsElapsed)
   } catch (error) {
     handleError({ testState, error, errors })
